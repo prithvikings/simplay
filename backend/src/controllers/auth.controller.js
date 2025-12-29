@@ -1,3 +1,5 @@
+//src/controllers/auth.controller.js
+
 import User from '../models/User.js';
 import ApiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';

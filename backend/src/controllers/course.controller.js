@@ -1,7 +1,7 @@
 import Course from '../models/Course.js';
 import ApiError from '../utils/apiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import { fetchPlaylist,fetchPlaylistForResync } from '../services/youtube.service.js';
+import { fetchPlaylist, fetchPlaylistForResync } from '../services/youtube.service.js';
 
 export const importCourse = asyncHandler(async (req, res) => {
   const { playlistUrl, title } = req.body;
@@ -16,11 +16,8 @@ export const importCourse = asyncHandler(async (req, res) => {
     userId: req.user.id,
     title,
     playlistId: playlistData.playlistId,
-    videos: playlistData.videos,
-    progress: playlistData.videos.map((v) => ({
-      videoId: v.videoId,
-      completed: false,
-    })),
+    // Initialize videos with default isCompleted: false via schema
+    videos: playlistData.videos, 
     totalVideos: playlistData.videos.length,
     completedCount: 0,
   });
@@ -30,7 +27,6 @@ export const importCourse = asyncHandler(async (req, res) => {
     courseId: course._id,
   });
 });
-
 
 export const getCourses = asyncHandler(async (req, res) => {
   const courses = await Course.find({ userId: req.user.id })
@@ -42,7 +38,6 @@ export const getCourses = asyncHandler(async (req, res) => {
     courses,
   });
 });
-
 
 export const getCourseById = asyncHandler(async (req, res) => {
   const course = await Course.findOne({
@@ -60,45 +55,40 @@ export const getCourseById = asyncHandler(async (req, res) => {
   });
 });
 
-
 export const updateProgress = asyncHandler(async (req, res) => {
   const { videoId, completed } = req.body;
 
-  if (!videoId || typeof completed !== 'boolean') {
-    throw new ApiError(400, 'Invalid progress update');
+  // 1. Mark as completed and increment count atomically
+  if (completed) {
+    const result = await Course.updateOne(
+      {
+        _id: req.params.id,
+        userId: req.user.id,
+        "videos.videoId": videoId,
+        "videos.isCompleted": false // FIXED: Matches Schema
+      },
+      {
+        $set: {
+          "videos.$.isCompleted": true, // FIXED: Matches Schema
+          "videos.$.completedAt": new Date(),
+          lastWatchedVideoId: videoId
+        },
+        $inc: { completedCount: 1 }
+      }
+    );
+  } else {
+    // Handle un-completing (decrement count)
+    await Course.updateOne(
+      { _id: req.params.id, userId: req.user.id, "videos.videoId": videoId },
+      {
+        $set: { "videos.$.isCompleted": false, "videos.$.completedAt": null }, // FIXED: Matches Schema
+        $inc: { completedCount: -1 }
+      }
+    );
   }
 
-  const course = await Course.findOne({
-    _id: req.params.id,
-    userId: req.user.id,
-  });
-
-  if (!course) {
-    throw new ApiError(404, 'Course not found');
-  }
-
-  const progressItem = course.progress.find(
-    (p) => p.videoId === videoId
-  );
-
-  if (!progressItem) {
-    throw new ApiError(400, 'Invalid video ID');
-  }
-
-  if (!progressItem.completed && completed) {
-    progressItem.completed = true;
-    progressItem.completedAt = new Date();
-    course.completedCount += 1;
-    course.lastWatchedVideoId = videoId;
-  }
-
-  await course.save();
-
-  res.status(200).json({
-    success: true,
-  });
+  res.status(200).json({ success: true });
 });
-
 
 export const deleteCourse = asyncHandler(async (req, res) => {
   const deleted = await Course.findOneAndDelete({
@@ -115,8 +105,6 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   });
 });
 
-
-
 export const resyncCourse = asyncHandler(async (req, res) => {
   const course = await Course.findOne({
     _id: req.params.id,
@@ -130,47 +118,35 @@ export const resyncCourse = asyncHandler(async (req, res) => {
   // Fetch latest playlist state
   const latestVideos = await fetchPlaylistForResync(course.playlistId);
 
+  // Map existing videos by ID to preserve progress
   const existingVideoMap = new Map(
     course.videos.map((v) => [v.videoId, v])
   );
 
-  const progressMap = new Map(
-    course.progress.map((p) => [p.videoId, p])
-  );
-
+  const mergedVideos = [];
   let newVideosAdded = 0;
 
-  // --- Handle new & existing videos ---
-  latestVideos.forEach((video) => {
-    if (!existingVideoMap.has(video.videoId)) {
-      // NEW VIDEO
-      course.videos.push(video);
-      course.progress.push({
-        videoId: video.videoId,
-        completed: false,
-      });
-      newVideosAdded++;
+  latestVideos.forEach((latestVid) => {
+    if (existingVideoMap.has(latestVid.videoId)) {
+      // KEEP EXISTING: Preserve progress (isCompleted), just update details
+      const existing = existingVideoMap.get(latestVid.videoId);
+      
+      // Update metadata but keep progress
+      existing.title = latestVid.title;
+      existing.position = latestVid.position;
+      existing.isAvailable = latestVid.isAvailable;
+      
+      mergedVideos.push(existing);
     } else {
-      // EXISTING VIDEO → update availability/title if changed
-      const existing = existingVideoMap.get(video.videoId);
-      existing.isAvailable = video.isAvailable;
-      existing.title = video.title;
-      existing.position = video.position;
+      // NEW VIDEO: Add to list
+      mergedVideos.push(latestVid);
+      newVideosAdded++;
     }
   });
 
-  // --- Handle removed videos ---
-  const latestVideoIds = new Set(
-    latestVideos.map((v) => v.videoId)
-  );
-
-  course.videos.forEach((video) => {
-    if (!latestVideoIds.has(video.videoId)) {
-      video.isAvailable = false;
-    }
-  });
-
-  // --- Update totals ---
+  // Replace the videos array with the new merged list
+  // (This automatically handles "deleted" videos by omitting them)
+  course.videos = mergedVideos;
   course.totalVideos = course.videos.length;
 
   await course.save();

@@ -1,3 +1,5 @@
+// backend/src/models/Course.js
+
 import mongoose from 'mongoose';
 
 const videoSchema = new mongoose.Schema(
@@ -6,38 +8,27 @@ const videoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     title: {
       type: String,
       required: true,
     },
-
     position: {
       type: Number,
       required: true,
     },
-
     isAvailable: {
       type: Boolean,
       default: true,
     },
-  },
-  { _id: false }
-);
-
-const progressSchema = new mongoose.Schema(
-  {
-    videoId: {
-      type: String,
-      required: true,
-    },
-
-    completed: {
+    // --- Merged Progress Fields ---
+    isCompleted: {
       type: Boolean,
       default: false,
     },
-
-    completedAt: Date,
+    completedAt: {
+      type: Date,
+      default: null
+    }
   },
   { _id: false }
 );
@@ -50,39 +41,29 @@ const courseSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
     title: {
       type: String,
       required: true,
       trim: true,
     },
-
     playlistId: {
       type: String,
       required: true,
       index: true,
     },
-
     videos: {
       type: [videoSchema],
       required: true,
     },
-
-    progress: {
-      type: [progressSchema],
-      required: true,
-    },
-
+    // removed: progress array
     lastWatchedVideoId: {
       type: String,
-      index: true,
+      default: null,
     },
-
     completedCount: {
       type: Number,
       default: 0,
     },
-
     totalVideos: {
       type: Number,
       required: true,

@@ -1,3 +1,5 @@
+// backend/src/routes/course.routes.js
+
 import { Router } from 'express';
 
 import {
@@ -66,3 +68,4 @@ router.delete(
 );
 
 export default router;
+

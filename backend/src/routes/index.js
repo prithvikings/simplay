@@ -1,3 +1,5 @@
+// backend/src/routes/index.js
+
 import { Router } from 'express';
 
 import authRoutes from './auth.routes.js';
