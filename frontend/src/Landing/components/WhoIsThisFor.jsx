@@ -1,5 +1,6 @@
 import React from "react";
 import Badge from "./Badge";
+
 const forYou = [
   {
     title: "You Learn From Playlists",
@@ -46,7 +47,7 @@ const WhoIsThisFor = () => {
 
       {/* Content */}
       <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed flex justify-center">
-        <div className="grid grid-cols-2 max-w-5xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl w-full">
           {/* FOR YOU */}
           <div className="border border-dashed border-b-0 px-6 py-6">
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-6">
@@ -69,7 +70,8 @@ const WhoIsThisFor = () => {
           </div>
 
           {/* NOT FOR YOU */}
-          <div className="border border-dashed border-b-0 border-l-0 px-6 py-6">
+          {/* Changed border-l-0 to border-l md:border-l-0 so it has a left border on mobile when stacked */}
+          <div className="border border-dashed border-b-0 border-l md:border-l-0 px-6 py-6">
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-6">
               This is not for you if
             </h3>

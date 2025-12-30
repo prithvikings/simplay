@@ -1,5 +1,6 @@
 import React from "react";
 import Badge from "./Badge";
+
 const trustData = [
   {
     title: "Google Sign-In",
@@ -28,7 +29,8 @@ const Trust = () => {
 
       {/* Cards */}
       <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed min-h-[21vh] flex justify-center">
-        <div className="grid grid-cols-3 max-w-5xl w-full">
+        {/* Changed to grid-cols-1 for mobile, md:grid-cols-3 for tablet/desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 max-w-5xl w-full">
           {trustData.map((item, index) => (
             <div
               key={index}

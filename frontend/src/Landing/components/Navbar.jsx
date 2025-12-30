@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-900 border border-dashed border-t-0 pt-4 pb-4 px-6 flex justify-between items-center">
+    <div className="bg-zinc-100 dark:bg-zinc-900 border border-dashed border-t-0 pt-4 pb-4 px-4 md:px-6 flex justify-between items-center">
       {/* Logo */}
       <div className="logo flex items-center gap-1 group cursor-pointer">
         <svg
@@ -63,7 +63,8 @@ const Navbar = () => {
 
         <button
           className="
-            group inline-flex items-center gap-1.5
+            hidden md:inline-flex 
+            group items-center gap-1.5
             rounded-md px-2 py-1.5
             bg-transparent
             border border-zinc-300/70 dark:border-zinc-700/70

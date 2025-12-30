@@ -1,5 +1,6 @@
 import React from "react";
 import Badge from "./Badge";
+
 const comparisons = [
   { youtube: "Endless recommendations", simplay: "Zero distractions" },
   { youtube: "Comments and noise", simplay: "Clean learning interface" },
@@ -23,8 +24,8 @@ const WhyNotYouTube = () => {
       </div>
 
       {/* Headline */}
-      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 px-12 py-10">
-        <h2 className="text-3xl font-poppins text-zinc-900 dark:text-zinc-200 max-w-3xl leading-tight">
+      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 px-6 py-8 md:px-12 md:py-10">
+        <h2 className="text-xl md:text-3xl font-poppins text-zinc-900 dark:text-zinc-200 max-w-3xl leading-tight">
           YouTube is built to keep you watching.
           <br />
           Simplay is built to help you finish.
@@ -39,7 +40,7 @@ const WhyNotYouTube = () => {
             className="grid grid-cols-[1fr_auto_1fr] border-b border-dashed last:border-b-0"
           >
             {/* YouTube */}
-            <div className="p-6 text-sm font-inter text-zinc-600 dark:text-zinc-400">
+            <div className="p-3 md:p-6 text-xs md:text-sm font-inter text-zinc-600 dark:text-zinc-400 flex items-center">
               {row.youtube}
             </div>
 
@@ -47,7 +48,7 @@ const WhyNotYouTube = () => {
             <div className="w-px bg-zinc-400/40 dark:bg-zinc-700/60" />
 
             {/* Simplay */}
-            <div className="p-6 text-sm font-inter text-zinc-900 dark:text-zinc-200">
+            <div className="p-3 md:p-6 text-xs md:text-sm font-inter text-zinc-900 dark:text-zinc-200 flex items-center">
               {row.simplay}
             </div>
           </div>

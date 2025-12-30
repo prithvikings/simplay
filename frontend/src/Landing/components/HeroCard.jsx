@@ -20,8 +20,12 @@ const HeroCard = () => {
   ];
 
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[21vh]  flex justify-center">
-      <div className="grid grid-cols-3 max-w-5xl w-full">
+    <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[21vh] flex justify-center">
+      {/* Changed grid-cols-3 to grid-cols-1 md:grid-cols-3 
+         grid-cols-1: Applies to mobile (stacks items vertically).
+         md:grid-cols-3: Applies to Tablet/Desktop (restores original 3 columns).
+      */}
+      <div className="grid grid-cols-1 md:grid-cols-3 max-w-5xl w-full">
         {Data.map((item, index) => (
           <div
             key={index}

@@ -1,5 +1,6 @@
 import React from "react";
 import Badge from "./Badge";
+
 const principles = [
   {
     title: "No Algorithm Control",
@@ -27,8 +28,8 @@ const BuiltForLearners = () => {
       </div>
 
       {/* Statement */}
-      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 px-12 py-10">
-        <h2 className="text-3xl font-poppins text-zinc-900 dark:text-zinc-200 max-w-4xl leading-tight">
+      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 px-6 py-8 md:px-12 md:py-10">
+        <h2 className="text-xl md:text-3xl font-poppins text-zinc-900 dark:text-zinc-200 max-w-4xl leading-tight">
           YouTube optimizes for watch time.
           <br />
           Simplay optimizes for understanding and completion.
@@ -37,7 +38,7 @@ const BuiltForLearners = () => {
 
       {/* Cards */}
       <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed min-h-[21vh] flex justify-center">
-        <div className="grid grid-cols-3 max-w-5xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 max-w-5xl w-full">
           {principles.map((item, index) => (
             <div
               key={index}

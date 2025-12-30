@@ -1,8 +1,9 @@
 import React from "react";
-import PastePlaylistSVG from "./svg/PastePlaylistSVG";
+import PastePlaylistSVG from "./svg/PastePlaylistSVG"; // Ensure paths are correct
 import CreateCourseSVG from "./svg/CreateCourseSVG";
 import LearnSVG from "./svg/LearnSVG";
-import Badge from "./Badge"
+import Badge from "./Badge";
+
 const steps = [
   {
     title: "Paste a YouTube Playlist",
@@ -35,7 +36,7 @@ const HowdoI = () => {
     <div>
       {/* Section label */}
       <div className="bg-zinc-50 dark:bg-zinc-950 border border-dashed border-b-0 py-4 px-6 flex justify-center items-center">
-       <Badge label="How do I get started?" />
+        <Badge label="How do I get started?" />
       </div>
 
       {steps.map((step, index) => {
@@ -44,17 +45,29 @@ const HowdoI = () => {
         return (
           <div
             key={index}
-            className="bg-zinc-50 dark:bg-zinc-950 border border-dashed border-b-0 flex"
+            // On mobile: Flex-col (or col-reverse for the reversed step to keep Visual on top)
+            // On desktop: Always Row
+            className={`
+              bg-zinc-50 dark:bg-zinc-950 border border-dashed border-b-0 flex 
+              ${step.reverse ? "flex-col-reverse" : "flex-col"} 
+              md:flex-row
+            `}
           >
             {!step.reverse && (
-              <div className="border border-dashed border-b-0 border-l-0 border-t-0 p-12 flex items-start">
+              <div
+                className="
+                  border border-dashed border-b md:border-b-0 md:border-r border-l-0 border-t-0 
+                  p-8 md:p-12 
+                  flex justify-center md:justify-start items-start
+                "
+              >
                 <div className="h-[64px] w-[120px] text-zinc-800 dark:text-zinc-200">
                   <Visual />
                 </div>
               </div>
             )}
 
-            <div className="p-12 py-8 pl-4 flex flex-col gap-2">
+            <div className="p-6 pt-8 md:p-12 md:pl-4 flex flex-col gap-2 w-full">
               <div className="flex gap-2 items-center">
                 <h2 className="text-xl font-poppins font-medium text-zinc-900 dark:text-zinc-200">
                   {step.title}
@@ -78,7 +91,13 @@ const HowdoI = () => {
             </div>
 
             {step.reverse && (
-              <div className="border border-dashed border-b-0 border-r-0 border-t-0 p-12 flex items-start">
+              <div
+                className="
+                  border border-dashed border-b md:border-b-0 border-r-0 md:border-l border-t-0 
+                  p-8 md:p-12 
+                  flex justify-center md:justify-start items-start
+                "
+              >
                 <div className="h-[64px] w-[120px] text-zinc-800 dark:text-zinc-200">
                   <Visual />
                 </div>

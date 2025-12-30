@@ -24,7 +24,7 @@ const Hero = () => {
   );
 
   return (
-    <div className="relative overflow-hidden bg-zinc-50 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[70vh] px-8 flex items-center justify-center">
+    <div className="relative overflow-hidden bg-zinc-50 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[60vh] md:min-h-[70vh] px-4 md:px-8 flex items-center justify-center">
       {/* Blurry light leak */}
       <div
         aria-hidden
@@ -46,7 +46,7 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center items-center gap-8 text-center">
         <div className="flex flex-col gap-4 items-center">
-          <h1 className="text-5xl font-spacegrotesk text-zinc-900 dark:text-zinc-200 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-spacegrotesk text-zinc-900 dark:text-zinc-200 leading-tight">
             Turn YouTube Playlists <br />
             Into{" "}
             <span className="text-sky-600 dark:text-sky-400">
@@ -55,13 +55,13 @@ const Hero = () => {
             Courses
           </h1>
 
-          <p className="text-xs font-spacegrotesk leading-relaxed max-w-sm text-zinc-600 dark:text-zinc-500">
+          <p className="text-xs font-spacegrotesk leading-relaxed max-w-xs md:max-w-sm text-zinc-600 dark:text-zinc-500">
             Learn from YouTube playlists without recommendations, comments, or
             distractions.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-2">
           <Button
             variant="default"
             className="
@@ -71,6 +71,7 @@ const Hero = () => {
     bg-sky-500 hover:bg-sky-600
     text-white
     inline-flex items-center gap-2
+    w-full sm:w-auto
 
     [text-shadow:0_1px_1px_rgba(0,0,0,0.25)]
     shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-2px_0_rgba(0,0,0,0.15)]
@@ -98,6 +99,7 @@ const Hero = () => {
     flex items-center justify-center gap-2
     px-3 py-1 corner-squircel rounded
     cursor-pointer
+    w-full sm:w-auto
 
     border border-zinc-200 dark:border-zinc-700
     bg-white/70 dark:bg-zinc-900/60
@@ -111,7 +113,7 @@ const Hero = () => {
 
     active:translate-y-[1px]
     active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]
-hover:text-zinc-900 dark:hover:text-zinc-100
+    hover:text-zinc-900 dark:hover:text-zinc-100
 
     transition-all duration-200
   "
