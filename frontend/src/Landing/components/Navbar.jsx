@@ -1,8 +1,13 @@
 import React from "react";
 import { AnimatedThemeToggle } from "../../components/animated-theme-toggle";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/login");
+  };
   return (
     <div className="bg-zinc-100 dark:bg-zinc-900 border border-dashed border-t-0 pt-4 pb-4 px-4 md:px-6 flex justify-between items-center">
       {/* Logo */}
@@ -62,6 +67,7 @@ const Navbar = () => {
         <AnimatedThemeToggle className="h-8 w-8 bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700" />
 
         <button
+          onClick={handleClick}
           className="
             hidden md:inline-flex 
             group items-center gap-1.5

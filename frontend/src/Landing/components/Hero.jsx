@@ -1,7 +1,13 @@
 import React from "react";
 import { Button } from "../../components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/login");
+  };
+
   const ArrowCircleIcon = ({ className = "" }) => (
     <svg
       width="18"
@@ -63,6 +69,7 @@ const Hero = () => {
 
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-2">
           <Button
+            onClick={handleClick}
             variant="default"
             className="
     h-7 px-3

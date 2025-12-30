@@ -3,6 +3,7 @@ import { useAuth } from "./context/AuthContext";
 import LandingPage from "./Landing/LandingPage";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
+import CourseViewer from "./pages/CourseViewer";
 
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
@@ -53,6 +54,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/course/:courseId"
+        element={
+          <ProtectedRoute>
+            <CourseViewer />
           </ProtectedRoute>
         }
       />

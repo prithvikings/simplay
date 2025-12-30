@@ -1,31 +1,30 @@
 //src/services/googleAuth.service.js
 
-import { OAuth2Client } from 'google-auth-library';
-import env from '../config/env.js';
-import ApiError from '../utils/apiError.js';
+import axios from "axios";
+import env from "../config/env.js";
+import ApiError from "../utils/apiError.js";
 
-const client = new OAuth2Client(env.googleClientId);
+// Client not needed for simple access token userinfo fetch
+// const client = new OAuth2Client(env.googleClientId);
 
-export const verifyGoogleToken = async (idToken) => {
+export const verifyGoogleToken = async (token) => {
   try {
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: env.googleClientId,
-    });
-
-    const payload = ticket.getPayload();
-
-    if (!payload) {
-      throw new ApiError(401, 'Invalid Google token payload');
-    }
+    // Verify and get user info using the Access Token
+    const { data } = await axios.get(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     return {
-      googleId: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      avatar: payload.picture,
+      googleId: data.sub,
+      email: data.email,
+      name: data.name,
+      avatar: data.picture,
     };
   } catch (error) {
-    throw new ApiError(401, 'Google authentication failed');
+    console.error("Google Auth Error:", error.response?.data || error.message);
+    throw new ApiError(401, "Google authentication failed");
   }
 };
