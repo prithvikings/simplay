@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/button";
 
 const FinalCTA = () => {
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed mb-4 relative overflow-hidden">
+    <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed  relative overflow-hidden">
       {/* Adjusted padding for mobile vs desktop */}
       <div className="px-6 py-10 md:px-12 md:py-16 flex flex-col items-center text-center gap-6 relative">
         <div

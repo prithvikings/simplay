@@ -8,6 +8,7 @@ import BuiltForLearners from "./components/BuiltForLearners";
 import WhoIsThisFor from "./components/WhoIsThisFor";
 import Trust from "./components/Trust";
 import FinalCTA from "./components/FinalCTA";
+import { MinimalFooter } from "../components/minimal-footer";
 const LandingPage = () => {
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen ">
@@ -22,6 +23,7 @@ const LandingPage = () => {
         <Trust />
         <FinalCTA />
       </div>
+      <MinimalFooter />
     </div>
   );
 };

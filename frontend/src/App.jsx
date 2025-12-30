@@ -1,30 +1,62 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './Landing/LandingPage';
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import LandingPage from "./Landing/LandingPage";
+import Login from "./Pages/Login";
+import Dashboard from "./Pages/Dashboard";
 
-// Placeholder components - we will build these properly later
-const Dashboard = () => <div className="p-10 text-2xl font-bold">Dashboard (Protected)</div>;
-const Login = () => <div className="p-10 text-2xl font-bold">Login Page</div>;
+const ProtectedRoute = ({ children }) => {
+  const { token, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <div>Loading...</div>; // Or a spinner component
+
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const { token, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 function App() {
-  // Mock auth state for now
-  const isAuthenticated = false; 
-
   return (
-
-      <Routes>
-        {/* Public Landing Page */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LandingPage />} />
-        
-        {/* Auth Page */}
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
-
-        {/* Protected Dashboard */}
-        <Route 
-          path="/dashboard" 
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-        />
-      </Routes>
-
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 
