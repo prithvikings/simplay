@@ -8,27 +8,22 @@ import {
   ArrowRight,
   LayoutList,
 } from "lucide-react";
-import axios from "axios";
 import { useCourses } from "../context/CourseContext";
+import api from "../api/axios"; // Import our API client
 
 const ImportModal = ({ isOpen, onClose }) => {
   const { addCourse } = useCourses();
 
-  // State for the flow
-  const [step, setStep] = useState(1); // 1: Input, 2: Preview/Confirm
+  const [step, setStep] = useState(1);
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // State for the fetched playlist data
   const [playlistData, setPlaylistData] = useState(null);
   const [customTitle, setCustomTitle] = useState("");
 
   if (!isOpen) return null;
 
-  // --- HANDLERS ---
-
-  // 1. Simulate Validating the Playlist (Replace with real backend call)
+  // --- 1. Validate Playlist with Backend ---
   const handleValidate = async () => {
     if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
       setError("Please enter a valid YouTube URL");
@@ -39,57 +34,48 @@ const ImportModal = ({ isOpen, onClose }) => {
     setError("");
 
     try {
-      // TODO: REAL BACKEND CALL
-      // const { data } = await axios.post('/api/playlist/validate', { url });
+      // Calls your new /validate endpoint
+      const { data } = await api.post("/courses/validate", {
+        playlistUrl: url,
+      });
 
-      // MOCK DATA DELAY (Remove this when connecting to backend)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mock Response matching your Reference Image style
-      const mockData = {
-        id: "mock-id-" + Date.now(),
-        title: "Net Ninja: React Router 6",
-        author: "The Net Ninja",
-        thumbnail: "https://i.ytimg.com/vi/59IXY5IDrBA/maxresdefault.jpg",
-        videoCount: 18,
-        duration: "3h 20m",
-      };
-
-      setPlaylistData(mockData);
-      setCustomTitle(mockData.title); // Pre-fill title
-      setStep(2); // Move to next step
+      setPlaylistData(data); // Backend returns { title, author, thumbnail, etc }
+      setCustomTitle(data.title);
+      setStep(2);
     } catch (err) {
-      setError("Could not fetch playlist. Make sure it is public.");
+      console.error(err);
+      setError(
+        err.response?.data?.message ||
+          "Failed to validate playlist. Is it public?"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 2. Final Create Action
+  // --- 2. Create Course on Backend ---
   const handleCreate = async () => {
     setIsLoading(true);
-    // TODO: REAL BACKEND CALL to save course
-    // await axios.post('/api/courses', { ...playlistData, title: customTitle });
+    try {
+      const { data } = await api.post("/courses/import", {
+        playlistUrl: url,
+        title: customTitle,
+      });
 
-    // Simulate delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Add to context (so it appears on dashboard immediately)
-    addCourse({
-      ...playlistData,
-      title: customTitle,
-      progress: 0,
-      totalVideos: playlistData.videoCount,
-      completedVideos: 0,
-      lastWatched: "Not Started",
-    });
-
-    setIsLoading(false);
-    handleClose(); // Close modal
+      if (data.success) {
+        // Add the new full course object to context so it appears instantly
+        addCourse(data.course);
+        handleClose();
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to create course. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
-    // Reset state when closing
     setStep(1);
     setUrl("");
     setPlaylistData(null);

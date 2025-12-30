@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 import {
   LayoutDashboard,
-  Compass,
   Library,
-  Settings,
   LogOut,
   PlusCircle,
   PanelLeftClose,
   PanelLeftOpen,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { AnimatedThemeToggle } from "./animated-theme-toggle";
 
-const Sidebar = () => {
+// Accept onOpenImportModal prop to trigger the modal from parent
+const Sidebar = ({ onOpenImportModal }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
@@ -23,9 +20,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-    { icon: Compass, label: "Explore", path: "/explore" },
-    { icon: Library, label: "My Library", path: "/library" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Library, label: "My Courses", path: "/courses" },
   ];
 
   return (
@@ -102,7 +97,7 @@ const Sidebar = () => {
                 {item.label}
               </span>
 
-              {/* Active Indicator Dot (Optional aesthetic touch) */}
+              {/* Active Indicator Dot */}
               {isActive && !isCollapsed && (
                 <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-sky-500" />
               )}
@@ -117,6 +112,7 @@ const Sidebar = () => {
           }`}
         >
           <button
+            onClick={onOpenImportModal} // Trigger parent modal function
             className={`
                 group flex items-center rounded-xl text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all duration-300
                 border border-transparent hover:border-sky-200 dark:hover:border-sky-800
@@ -232,7 +228,7 @@ const Sidebar = () => {
           <button
             onClick={logout}
             className={`
-                text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all
+                cursor-pointer text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all
                 ${isCollapsed ? "hidden" : "block"}
             `}
             title="Logout"

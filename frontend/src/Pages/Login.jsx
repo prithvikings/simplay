@@ -21,7 +21,7 @@ const Login = () => {
     setIsLoading(true);
     setError("");
     try {
-      const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
+      const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
       const { data } = await axios.post(BACKEND_URL, {
         idToken: credential,
       });

@@ -1,36 +1,44 @@
-import Course from '../models/Course.js';
-import ApiError from '../utils/apiError.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import { fetchPlaylist, fetchPlaylistForResync } from '../services/youtube.service.js';
+import Course from "../models/Course.js";
+import ApiError from "../utils/apiError.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import {
+  fetchPlaylist,
+  fetchPlaylistForResync,
+} from "../services/youtube.service.js";
 
 export const importCourse = asyncHandler(async (req, res) => {
   const { playlistUrl, title } = req.body;
 
-  if (!playlistUrl || !title) {
-    throw new ApiError(400, 'Playlist URL and title are required');
+  if (!playlistUrl) {
+    // Title is optional now (can use default)
+    throw new ApiError(400, "Playlist URL is required");
   }
 
   const playlistData = await fetchPlaylist(playlistUrl);
 
   const course = await Course.create({
     userId: req.user.id,
-    title,
+    title: title || playlistData.title, // Use custom title or default
+    author: playlistData.author, // SAVE AUTHOR
+    thumbnail: playlistData.thumbnail, // SAVE THUMBNAIL
     playlistId: playlistData.playlistId,
-    // Initialize videos with default isCompleted: false via schema
-    videos: playlistData.videos, 
+    videos: playlistData.videos,
     totalVideos: playlistData.videos.length,
     completedCount: 0,
   });
 
   res.status(201).json({
     success: true,
-    courseId: course._id,
+    course, // Return full course so frontend context can update
   });
 });
 
 export const getCourses = asyncHandler(async (req, res) => {
   const courses = await Course.find({ userId: req.user.id })
-    .select('title completedCount totalVideos updatedAt')
+    // Select the new fields so cards look correct
+    .select(
+      "title author thumbnail completedCount totalVideos updatedAt lastWatchedVideoId"
+    )
     .sort({ updatedAt: -1 });
 
   res.status(200).json({
@@ -46,7 +54,7 @@ export const getCourseById = asyncHandler(async (req, res) => {
   });
 
   if (!course) {
-    throw new ApiError(404, 'Course not found');
+    throw new ApiError(404, "Course not found");
   }
 
   res.status(200).json({
@@ -65,15 +73,15 @@ export const updateProgress = asyncHandler(async (req, res) => {
         _id: req.params.id,
         userId: req.user.id,
         "videos.videoId": videoId,
-        "videos.isCompleted": false // FIXED: Matches Schema
+        "videos.isCompleted": false, // FIXED: Matches Schema
       },
       {
         $set: {
           "videos.$.isCompleted": true, // FIXED: Matches Schema
           "videos.$.completedAt": new Date(),
-          lastWatchedVideoId: videoId
+          lastWatchedVideoId: videoId,
         },
-        $inc: { completedCount: 1 }
+        $inc: { completedCount: 1 },
       }
     );
   } else {
@@ -82,7 +90,7 @@ export const updateProgress = asyncHandler(async (req, res) => {
       { _id: req.params.id, userId: req.user.id, "videos.videoId": videoId },
       {
         $set: { "videos.$.isCompleted": false, "videos.$.completedAt": null }, // FIXED: Matches Schema
-        $inc: { completedCount: -1 }
+        $inc: { completedCount: -1 },
       }
     );
   }
@@ -97,7 +105,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   });
 
   if (!deleted) {
-    throw new ApiError(404, 'Course not found');
+    throw new ApiError(404, "Course not found");
   }
 
   res.status(200).json({
@@ -112,16 +120,14 @@ export const resyncCourse = asyncHandler(async (req, res) => {
   });
 
   if (!course) {
-    throw new ApiError(404, 'Course not found');
+    throw new ApiError(404, "Course not found");
   }
 
   // Fetch latest playlist state
   const latestVideos = await fetchPlaylistForResync(course.playlistId);
 
   // Map existing videos by ID to preserve progress
-  const existingVideoMap = new Map(
-    course.videos.map((v) => [v.videoId, v])
-  );
+  const existingVideoMap = new Map(course.videos.map((v) => [v.videoId, v]));
 
   const mergedVideos = [];
   let newVideosAdded = 0;
@@ -130,12 +136,12 @@ export const resyncCourse = asyncHandler(async (req, res) => {
     if (existingVideoMap.has(latestVid.videoId)) {
       // KEEP EXISTING: Preserve progress (isCompleted), just update details
       const existing = existingVideoMap.get(latestVid.videoId);
-      
+
       // Update metadata but keep progress
       existing.title = latestVid.title;
       existing.position = latestVid.position;
       existing.isAvailable = latestVid.isAvailable;
-      
+
       mergedVideos.push(existing);
     } else {
       // NEW VIDEO: Add to list
@@ -155,5 +161,23 @@ export const resyncCourse = asyncHandler(async (req, res) => {
     success: true,
     addedVideos: newVideosAdded,
     totalVideos: course.totalVideos,
+  });
+});
+
+export const validatePlaylist = asyncHandler(async (req, res) => {
+  const { playlistUrl } = req.body;
+  if (!playlistUrl) throw new ApiError(400, "Playlist URL is required");
+
+  // Fetch data from YouTube service
+  const playlistData = await fetchPlaylist(playlistUrl);
+
+  // Return preview data
+  res.status(200).json({
+    success: true,
+    playlistId: playlistData.playlistId,
+    title: playlistData.title,
+    author: playlistData.author, // Ensure youtube.service returns this
+    thumbnail: playlistData.thumbnail, // Ensure youtube.service returns this
+    videoCount: playlistData.videos.length,
   });
 });

@@ -237,3 +237,51 @@
 .styled-input::placeholder {
   color: #aaa;
 }
+
+@layer utilities {
+  /* 1. Target the scrollbar container */
+  ::-webkit-scrollbar {
+    width: 6px;  /* Vertical scrollbar width */
+    height: 6px; /* Horizontal scrollbar height */
+  }
+
+  /* 2. The "Track" (background behind the bar) - Make it transparent */
+  ::-webkit-scrollbar-track {
+    background: transparent; 
+  }
+
+  /* 3. The "Thumb" (the moving part) */
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-300 dark:bg-zinc-800 rounded-full;
+    border: 2px solid transparent; /* Creates padding effect if background-clip is used, optional */
+    background-clip: content-box;
+  }
+
+  /* 4. Hover state for the thumb */
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-400 dark:bg-zinc-700;
+  }
+
+  /* OPTIONAL: Utility class to hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+@layer base {
+  * {
+    /* For Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.zinc.300') transparent;
+  }
+
+  .dark * {
+    /* For Firefox Dark Mode */
+    scrollbar-color: theme('colors.zinc.800') transparent;
+  }
+}

@@ -4,7 +4,7 @@ import LandingPage from "./Landing/LandingPage";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
 import CourseViewer from "./pages/CourseViewer";
-
+import Courses from "./pages/Courses";
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
   const location = useLocation();
@@ -62,6 +62,14 @@ function App() {
         element={
           <ProtectedRoute>
             <CourseViewer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/courses"
+        element={
+          <ProtectedRoute>
+            <Courses />
           </ProtectedRoute>
         }
       />
