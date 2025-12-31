@@ -23,7 +23,7 @@ const BuiltForLearners = () => {
   return (
     <div>
       {/* Section label */}
-      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 py-4 px-6 flex justify-center items-center">
+      <div className=" dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 py-4 px-6 flex justify-center items-center">
         <Badge label="Built for learners" />
       </div>
 

@@ -56,6 +56,7 @@ const ImportModal = ({ isOpen, onClose }) => {
   // --- 2. Create Course on Backend ---
   const handleCreate = async () => {
     setIsLoading(true);
+    setError(""); // Optional: Clear old errors before starting
     try {
       const { data } = await api.post("/courses/import", {
         playlistUrl: url,
@@ -68,10 +69,14 @@ const ImportModal = ({ isOpen, onClose }) => {
         handleClose();
       }
     } catch (err) {
-      console.error(err);
-      setError("Failed to create course. Please try again.");
-    } finally {
-      setIsLoading(false);
+      // 1. Log the full error to see the object structure
+      console.log("Full Error Object:", err);
+
+      // 2. Extract the specific message from the backend's 409 response
+      const backendMessage = err.response?.data?.message;
+
+      // 3. Set the error state so the red box in the UI shows the real reason
+      setError(backendMessage || "Failed to create course. Please try again.");
     }
   };
 

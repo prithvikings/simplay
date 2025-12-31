@@ -1,5 +1,5 @@
 import React from "react";
-import PastePlaylistSVG from "./svg/PastePlaylistSVG"; // Ensure paths are correct
+import PastePlaylistSVG from "./svg/PastePlaylistSVG";
 import CreateCourseSVG from "./svg/CreateCourseSVG";
 import LearnSVG from "./svg/LearnSVG";
 import Badge from "./Badge";
@@ -33,9 +33,9 @@ const steps = [
 
 const HowdoI = () => {
   return (
-    <div>
+    <div className="max-w-5xl mx-auto w-full">
       {/* Section label */}
-      <div className="bg-zinc-50 dark:bg-zinc-950 border border-dashed border-b-0 py-4 px-6 flex justify-center items-center">
+      <div className="dark:bg-zinc-950 border border-dashed border-b-0 py-4 px-6 flex justify-center items-center">
         <Badge label="How do I get started?" />
       </div>
 
@@ -45,70 +45,65 @@ const HowdoI = () => {
         return (
           <div
             key={index}
-            // On mobile: Flex-col (or col-reverse for the reversed step to keep Visual on top)
-            // On desktop: Always Row
             className={`
-              bg-zinc-50 dark:bg-zinc-950 border border-dashed border-b-0 flex 
-              ${step.reverse ? "flex-col-reverse" : "flex-col"} 
-              md:flex-row
+              bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 flex 
+              
+              /* RESPONSIVE LAYOUT FIX: */
+              /* Mobile: Always stack vertically (Visual on top, Text on bottom) */
+              flex-col
+              
+              /* Desktop: Alternating Row/Row-Reverse based on prop */
+              ${step.reverse ? "md:flex-row-reverse" : "md:flex-row"} 
             `}
           >
-            {!step.reverse && (
-              <div
-                className="
-                  border border-dashed border-b md:border-b-0 md:border-r border-l-0 border-t-0 
-                  p-8 md:p-12 
-                  flex justify-center md:justify-start items-start
-                "
-              >
-                <div className="h-[64px] w-[120px] text-zinc-800 dark:text-zinc-200">
-                  <Visual />
-                </div>
+            {/* --- THE VISUAL CARD SECTION --- */}
+            <div
+              className={`
+                p-6 md:p-8 flex justify-center items-center
+                border-dashed border-zinc-200 dark:border-zinc-800
+                
+                /* BORDER LOGIC FIX: */
+                /* Mobile: Always border-bottom (to separate Visual from Text below) */
+                border-b md:border-b-0
+                
+                /* Desktop: Switch border side based on layout */
+                ${step.reverse ? "md:border-l" : "md:border-r"}
+              `}
+            >
+              <div className="w-full max-w-[320px] md:w-[280px] aspect-[4/3] shadow-sm rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <Visual />
               </div>
-            )}
+            </div>
 
-            <div className="p-6 pt-8 md:p-12 md:pl-4 flex flex-col gap-2 w-full">
-              <div className="flex gap-2 items-center">
-                <h2 className="text-xl font-poppins font-medium text-zinc-900 dark:text-zinc-200">
+            {/* --- THE TEXT SECTION --- */}
+            <div className="p-6 md:p-12 flex flex-col justify-center gap-3 w-full">
+              <div className="flex gap-3 items-center">
+                <h2 className="text-xl md:text-2xl font-poppins font-semibold text-zinc-900 dark:text-zinc-100">
                   {step.title}
                 </h2>
                 <div
-                  className="text-xs font-mono px-1.5 py-0.5 rounded-md
+                  className="text-xs font-mono px-2 py-1 rounded-md
                   bg-zinc-200 text-zinc-700
-                  dark:bg-zinc-900 dark:text-zinc-400
+                  dark:bg-zinc-800 dark:text-zinc-300
                 "
                 >
                   {step.badge}
                 </div>
               </div>
               <p
-                className="text-sm font-mono max-w-2xl tracking-tight leading-snug font-medium
+                className="text-sm md:text-base font-sans leading-relaxed
                 text-zinc-600 dark:text-zinc-400
               "
               >
                 {step.description}
               </p>
             </div>
-
-            {step.reverse && (
-              <div
-                className="
-                  border border-dashed border-b md:border-b-0 border-r-0 md:border-l border-t-0 
-                  p-8 md:p-12 
-                  flex justify-center md:justify-start items-start
-                "
-              >
-                <div className="h-[64px] w-[120px] text-zinc-800 dark:text-zinc-200">
-                  <Visual />
-                </div>
-              </div>
-            )}
           </div>
         );
       })}
 
       {/* Bottom border */}
-      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed" />
+      <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed h-px w-full" />
     </div>
   );
 };

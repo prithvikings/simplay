@@ -36,6 +36,24 @@ export const CourseProvider = ({ children }) => {
     setCourses((prev) => [newCourse, ...prev]);
   };
 
+  // 2. Delete Course (NEW FUNCTION)
+  const deleteCourse = async (courseId) => {
+    try {
+      // API Call
+      await api.delete(`/courses/${courseId}`);
+
+      // Update Local State (Remove the deleted course)
+      setCourses((prevCourses) =>
+        prevCourses.filter(
+          (course) => course._id !== courseId && course.id !== courseId
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete course", error);
+      // Optional: Add toast notification error here
+    }
+  };
+
   // 3. Get Single Course (Secure & Complete)
   const getCourse = async (courseId) => {
     // Check local state
@@ -118,7 +136,14 @@ export const CourseProvider = ({ children }) => {
 
   return (
     <CourseContext.Provider
-      value={{ courses, addCourse, getCourse, markVideoComplete, isLoading }}
+      value={{
+        courses,
+        addCourse,
+        getCourse,
+        markVideoComplete,
+        deleteCourse,
+        isLoading,
+      }}
     >
       {children}
     </CourseContext.Provider>

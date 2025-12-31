@@ -5,6 +5,7 @@ import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
 import CourseViewer from "./pages/CourseViewer";
 import Courses from "./pages/Courses";
+import DeveloperMsg from "./Pages/DeveloperMsg";
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
   const location = useLocation();
@@ -62,6 +63,14 @@ function App() {
         element={
           <ProtectedRoute>
             <CourseViewer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/developer"
+        element={
+          <ProtectedRoute>
+            <DeveloperMsg />
           </ProtectedRoute>
         }
       />

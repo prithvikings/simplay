@@ -11,7 +11,7 @@ import FinalCTA from "./components/FinalCTA";
 import { MinimalFooter } from "../components/minimal-footer";
 const LandingPage = () => {
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen ">
+    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen overflow-hidden">
       <div className="max-w-5xl mx-auto">
         <Navbar />
         <Hero />

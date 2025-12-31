@@ -30,7 +30,7 @@ const Hero = () => {
   );
 
   return (
-    <div className="relative overflow-hidden bg-zinc-50 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[60vh] md:min-h-[70vh] px-4 md:px-8 flex items-center justify-center">
+    <div className="relative overflow-hidden bg-zinc-50 dark:bg-zinc-950 border border-dashed border-t-0 border-b-0 min-h-[60vh] md:min-h-[70vh] px-4 md:px-8 md:py-0 flex items-center justify-center py-24">
       {/* Blurry light leak */}
       <div
         aria-hidden
@@ -50,7 +50,7 @@ const Hero = () => {
       <div aria-hidden className="grain-overlay" />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col justify-center items-center gap-8 text-center">
+      <div className="relative z-10 flex flex-col justify-center items-center gap-4 text-center">
         <div className="flex flex-col gap-4 items-center">
           <h1 className="text-3xl md:text-5xl font-spacegrotesk text-zinc-900 dark:text-zinc-200 leading-tight">
             Turn YouTube Playlists <br />

@@ -10,27 +10,62 @@ export const importCourse = asyncHandler(async (req, res) => {
   const { playlistUrl, title } = req.body;
 
   if (!playlistUrl) {
-    // Title is optional now (can use default)
     throw new ApiError(400, "Playlist URL is required");
   }
 
-  const playlistData = await fetchPlaylist(playlistUrl);
+  // 1. Fetch Playlist Data
+  let playlistData;
+  try {
+    playlistData = await fetchPlaylist(playlistUrl);
+  } catch (error) {
+    console.error("YouTube Fetch Error:", error);
+    throw new ApiError(
+      400,
+      "Failed to fetch playlist. Is the URL correct and public?"
+    );
+  }
 
-  const course = await Course.create({
-    userId: req.user.id,
-    title: title || playlistData.title, // Use custom title or default
-    author: playlistData.author, // SAVE AUTHOR
-    thumbnail: playlistData.thumbnail, // SAVE THUMBNAIL
+  if (!playlistData || !playlistData.playlistId) {
+    throw new ApiError(400, "Invalid playlist data received from YouTube.");
+  }
+
+  // 2. CHECK FOR DUPLICATES (Prevents 500 Error)
+  // Use req.user._id or req.user.id depending on your auth middleware
+  const userId = req.user._id || req.user.id;
+
+  const existingCourse = await Course.findOne({
+    userId: userId,
     playlistId: playlistData.playlistId,
-    videos: playlistData.videos,
-    totalVideos: playlistData.videos.length,
-    completedCount: 0,
   });
 
-  res.status(201).json({
-    success: true,
-    course, // Return full course so frontend context can update
-  });
+  if (existingCourse) {
+    throw new ApiError(409, "You have already imported this course.");
+  }
+
+  // 3. Create Course
+  try {
+    const course = await Course.create({
+      userId: userId,
+      title: title || playlistData.title,
+      author: playlistData.author,
+      thumbnail: playlistData.thumbnail,
+      playlistId: playlistData.playlistId,
+      videos: playlistData.videos,
+      totalVideos: playlistData.videos.length,
+      completedCount: 0,
+    });
+
+    res.status(201).json({
+      success: true,
+      course,
+    });
+  } catch (error) {
+    // Log the EXACT Mongoose error to the console for debugging
+    console.error("Database Save Error:", error);
+
+    // Throw a readable error to the frontend
+    throw new ApiError(500, `Database Error: ${error.message}`);
+  }
 });
 
 export const getCourses = asyncHandler(async (req, res) => {

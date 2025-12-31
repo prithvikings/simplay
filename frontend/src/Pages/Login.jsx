@@ -55,20 +55,20 @@ const Login = () => {
         }}
       />
 
-      {/* 2. Radial Gradient Mask (Focuses attention to center) */}
+      {/* 2. Radial Gradient Mask */}
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-50 via-transparent to-zinc-50/80 dark:from-zinc-950 dark:via-transparent dark:to-zinc-950/80" />
 
       {/* 3. Animated Light Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-sky-400/20 rounded-full blur-[120px] animate-pulse-slow mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute top-[-20%] left-[-20%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-sky-400/20 rounded-full blur-[80px] md:blur-[120px] animate-pulse-slow mix-blend-multiply dark:mix-blend-screen" />
       </div>
 
       {/* --- NAVIGATION (Floating Pill) --- */}
-      <nav className="absolute top-6 left-6 z-50">
+      <nav className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
         <button
           onClick={() => navigate("/")}
           className="cursor-pointer
-            group flex items-center gap-2 pl-3 px-6 py-1 
+            group flex items-center gap-2 pl-2 pr-4 py-1 md:pl-3 md:px-6 
             corner-squircel
             bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md
             border border-zinc-200/60 dark:border-zinc-800/60
@@ -99,17 +99,17 @@ const Login = () => {
           shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3)]
         "
         >
-          {/* Inner Highlight Border for that 'premium' feel */}
+          {/* Inner Highlight Border */}
           <div className="absolute inset-0 rounded-3xl border border-zinc-200/50 dark:border-zinc-700/50 pointer-events-none" />
 
           {/* Decor: Top gradient line */}
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sky-400 to-transparent opacity-50" />
 
-          <div className="p-8 md:p-12 flex flex-col items-center text-center">
+          <div className="p-6 md:p-12 flex flex-col items-center text-center">
             {/* Animated Logo Container */}
             <div className="mb-6 relative group">
               <div className="absolute inset-0 bg-sky-400/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100" />
-              <div className="relative bg-gradient-to-br from-white to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-inner">
+              <div className="relative bg-gradient-to-br from-white to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 p-3 md:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-inner">
                 <svg
                   width="40"
                   height="40"
@@ -156,11 +156,11 @@ const Login = () => {
             </div>
 
             {/* Headlines */}
-            <h1 className="text-3xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-100 mb-3 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-100 mb-3 tracking-tight">
               Welcome Back
             </h1>
-            <p className="text-zinc-500 dark:text-zinc-400 text-xs mb-8 font-inter leading-relaxed w-full mx-auto max-w-[250px]">
-              Import playlists and learn without distractions.Your focus zone
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs mb-6 md:mb-8 font-inter leading-relaxed w-full mx-auto max-w-[250px]">
+              Import playlists and learn without distractions. Your focus zone
               awaits.
             </p>
 
@@ -184,21 +184,21 @@ const Login = () => {
                 <button
                   onClick={googleLogin}
                   className="
-                  cursor-pointer
-        relative w-full h-12
-        flex items-center justify-center gap-3
-        rounded-xl
-        bg-white dark:bg-zinc-800
-        border border-zinc-200 dark:border-zinc-700
-        text-zinc-700 dark:text-zinc-200
-        font-medium text-sm font-spacegrotesk
-        shadow-sm
-        hover:bg-zinc-50 dark:hover:bg-zinc-750
-        hover:border-zinc-300 dark:hover:border-zinc-600
-        active:scale-[0.98]
-        transition-all duration-200
-        group
-      "
+                    cursor-pointer
+                    relative w-full h-12
+                    flex items-center justify-center gap-3
+                    rounded-xl
+                    bg-white dark:bg-zinc-800
+                    border border-zinc-200 dark:border-zinc-700
+                    text-zinc-700 dark:text-zinc-200
+                    font-medium text-sm font-spacegrotesk
+                    shadow-sm
+                    hover:bg-zinc-50 dark:hover:bg-zinc-750
+                    hover:border-zinc-300 dark:hover:border-zinc-600
+                    active:scale-[0.98]
+                    transition-all duration-200
+                    group
+                  "
                 >
                   {/* Google SVG */}
                   <svg className="w-5 h-5" viewBox="0 0 24 24">

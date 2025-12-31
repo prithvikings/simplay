@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCourses } from "../context/CourseContext";
-import { AnimatedThemeToggle } from "../components/animated-theme-toggle"; // IMPORT ADDED
+import { AnimatedThemeToggle } from "../components/animated-theme-toggle";
 import {
   ArrowLeft,
   CheckCircle2,
   PlayCircle,
-  Lock,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -114,12 +113,32 @@ const CourseViewer = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 font-inter">
+      {/* --- MOBILE BACKDROP --- */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden animate-in fade-in"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* --- SIDEBAR --- */}
       <aside
         className={`
-            ${isSidebarOpen ? "w-80 border-r" : "w-0 border-none"} 
-            transition-all duration-300 ease-in-out
-            flex flex-col h-full border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden relative shrink-0
+            // Base Styles
+            flex flex-col h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 
+            transition-all duration-300 ease-in-out shrink-0 overflow-hidden
+            
+            // Mobile Styles (Drawer)
+            fixed inset-y-0 left-0 z-50 w-72 shadow-2xl md:shadow-none
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+
+            // Desktop Styles (Relative + Width Transition)
+            md:relative md:transform-none md:z-0
+            ${
+              isSidebarOpen
+                ? "md:w-80 md:border-r md:translate-x-0"
+                : "md:w-0 md:border-none"
+            }
         `}
       >
         {/* Sidebar Header */}
@@ -161,7 +180,11 @@ const CourseViewer = () => {
             return (
               <button
                 key={video.videoId}
-                onClick={() => setActiveVideoId(video.videoId)}
+                onClick={() => {
+                  setActiveVideoId(video.videoId);
+                  // Optional: Close sidebar on mobile when a video is selected
+                  // if (window.innerWidth < 768) setIsSidebarOpen(false);
+                }}
                 className={`
                     w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group
                     ${
@@ -205,7 +228,7 @@ const CourseViewer = () => {
           })}
         </div>
 
-        {/* --- NEW SIDEBAR FOOTER (Theme + Collapse) --- */}
+        {/* Sidebar Footer */}
         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 shrink-0 bg-zinc-50/50 dark:bg-zinc-950/50 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <AnimatedThemeToggle className="size-9 shrink-0" />
@@ -228,37 +251,45 @@ const CourseViewer = () => {
       </aside>
 
       {/* --- MAIN CONTENT --- */}
-      <main className="flex-1 flex flex-col h-full overflow-y-auto relative">
-        <header className="h-16 shrink-0 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl px-6 md:px-8 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-4 text-sm">
-            {/* Expand Sidebar Button (Only visible when sidebar closed) */}
+      <main className="flex-1 flex flex-col h-full overflow-y-auto relative w-full">
+        <header className="h-16 shrink-0 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl px-4 md:px-8 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-4 text-sm w-full">
+            {/* Desktop Expand Button (Hidden on Mobile) */}
             {!isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="hidden md:block p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 title="Expand Sidebar"
               >
                 <SidebarOpen size={20} />
               </button>
             )}
 
-            <div className="flex items-center gap-2">
+            {/* Mobile-Only Open Button */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              title="Open Menu"
+            >
+              <SidebarOpen size={20} />
+            </button>
+
+            <div className="flex items-center gap-2 overflow-hidden">
               <Link
                 to="/dashboard"
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium"
+                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium whitespace-nowrap"
               >
                 My Courses
               </Link>
-              <ChevronRight size={14} className="text-zinc-400" />
-              <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate max-w-[200px] md:max-w-md">
+              <ChevronRight size={14} className="text-zinc-400 shrink-0" />
+              <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
                 {course.title}
               </span>
             </div>
           </div>
         </header>
 
-        {/* ... Rest of Main Content (Video Player, etc.) remains unchanged ... */}
-        <div className="flex-1 p-6 md:p-8 max-w-5xl mx-auto w-full relative">
+        <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full relative">
           <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-xl relative z-0">
             <iframe
               width="100%"
@@ -272,27 +303,28 @@ const CourseViewer = () => {
             ></iframe>
           </div>
 
+          {/* Controls Section */}
           <div className="mt-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-50 line-clamp-1">
+              <h2 className="text-xl md:text-2xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-50 line-clamp-2 md:line-clamp-1">
                 {activeVideoIndex + 1}. {activeVideo.title}
               </h2>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 w-full md:w-auto">
               <button
                 onClick={handlePrevious}
                 disabled={isFirstVideo}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+                className="flex-1 md:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
               >
                 <ChevronLeft size={16} />
-                Previous
+                <span className="hidden sm:inline">Previous</span>
               </button>
 
               <button
                 onClick={handleMarkComplete}
                 className={`
-                    flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95
+                    flex-1 md:flex-none justify-center flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95 whitespace-nowrap
                     ${
                       activeVideo.isCompleted || activeVideo.completed
                         ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-900/50"
@@ -306,29 +338,29 @@ const CourseViewer = () => {
                 <span>
                   {activeVideo.isCompleted || activeVideo.completed
                     ? "Completed"
-                    : "Mark as Complete"}
+                    : "Mark Complete"}
                 </span>
               </button>
 
               <button
                 onClick={handleNext}
                 disabled={isLastVideo}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+                className="flex-1 md:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
 
           <div className="border-b border-zinc-200 dark:border-zinc-800 mb-6">
-            <div className="flex gap-6">
+            <div className="flex gap-6 overflow-x-auto scrollbar-none">
               {["Description", "Notes", "Resources"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab.toLowerCase())}
                   className={`
-                        pb-3 text-sm font-medium border-b-2 transition-colors relative top-[1px]
+                        pb-3 text-sm font-medium border-b-2 transition-colors relative top-[1px] whitespace-nowrap
                         ${
                           activeTab === tab.toLowerCase()
                             ? "border-sky-500 text-sky-600 dark:text-sky-400"
@@ -342,17 +374,19 @@ const CourseViewer = () => {
             </div>
           </div>
 
-          <div className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+          <div className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed pb-10">
             {activeTab === "description" && (
-              <p>
-                In this lesson: <strong>{activeVideo.title}</strong>. <br />
-                <br />
-                Focus mode enabled. Watch the video above and mark it as
-                complete to track your progress.
-              </p>
+              <div className="animate-in fade-in duration-300">
+                <p>
+                  In this lesson: <strong>{activeVideo.title}</strong>. <br />
+                  <br />
+                  Focus mode enabled. Watch the video above and mark it as
+                  complete to track your progress.
+                </p>
+              </div>
             )}
             {activeTab === "notes" && (
-              <div className="p-10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center text-center text-zinc-500">
+              <div className="p-10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center text-center text-zinc-500 animate-in fade-in duration-300">
                 <span>Notes feature coming soon.</span>
               </div>
             )}
