@@ -11,6 +11,7 @@ import {
   resyncCourse,
   validatePlaylist,
   saveVideoNote,
+  getVideoSummary,
 } from "../controllers/course.controller.js";
 
 import { protect } from "../middlewares/auth.middleware.js";
@@ -68,6 +69,9 @@ router.put(
   validate(saveNoteSchema),
   saveVideoNote
 );
+
+// Generate video summary (validate ID)
+router.post("/:id/summary", validate(courseIdParamSchema), getVideoSummary);
 
 // Delete course (validate ID)
 router.delete("/:id", validate(courseIdParamSchema), deleteCourse);

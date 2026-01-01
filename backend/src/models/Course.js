@@ -12,6 +12,7 @@ const videoSchema = new mongoose.Schema(
     isCompleted: { type: Boolean, default: false },
     completedAt: { type: Date, default: null },
     note: { type: String, default: "" },
+    aiSummary: { type: String, default: null },
   },
   { _id: false }
 );

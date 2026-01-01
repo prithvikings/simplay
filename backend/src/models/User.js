@@ -21,9 +21,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-
     avatar: String,
-    // --- NEW FIELDS ---
     streak: {
       current: { type: Number, default: 0 },
       lastActiveDate: { type: Date, default: null },

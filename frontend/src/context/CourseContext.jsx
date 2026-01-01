@@ -167,6 +167,35 @@ export const CourseProvider = ({ children }) => {
     }
   };
 
+  // 6. Generate Video Summary (NEW)
+  const generateSummary = async (courseId, videoId) => {
+    try {
+      const { data } = await api.post(`/courses/${courseId}/summary`, {
+        videoId,
+      });
+
+      // Update local state to cache the summary
+      setCourses((prevCourses) =>
+        prevCourses.map((course) => {
+          if (course._id === courseId || course.id === courseId) {
+            return {
+              ...course,
+              videos: course.videos.map((v) =>
+                v.videoId === videoId ? { ...v, aiSummary: data.summary } : v
+              ),
+            };
+          }
+          return course;
+        })
+      );
+
+      return data.summary;
+    } catch (error) {
+      console.error("Failed to generate summary", error);
+      return null;
+    }
+  };
+
   return (
     <CourseContext.Provider
       value={{
@@ -176,6 +205,7 @@ export const CourseProvider = ({ children }) => {
         markVideoComplete,
         deleteCourse,
         saveNote,
+        generateSummary,
         isLoading,
       }}
     >

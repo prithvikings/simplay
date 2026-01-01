@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCourses } from "../context/CourseContext";
 import { AnimatedThemeToggle } from "../components/animated-theme-toggle";
 import Linkify from "linkify-react";
+import ReactMarkdown from "react-markdown";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -14,12 +15,18 @@ import {
   SidebarOpen,
   Loader2,
   Save,
+  Sparkles,
+  RefreshCw,
+  Copy,
+  FileText,
+  StickyNote,
 } from "lucide-react";
 
 const CourseViewer = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { getCourse, markVideoComplete, saveNote } = useCourses();
+  const { getCourse, markVideoComplete, saveNote, generateSummary } =
+    useCourses();
 
   // --- STATE ---
   const [course, setCourse] = useState(null);
@@ -32,6 +39,11 @@ const CourseViewer = () => {
   const [currentNote, setCurrentNote] = useState("");
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteStatus, setNoteStatus] = useState(""); // "saved", "unsaved", "error"
+
+  // --- AI SUMMARY STATE ---
+  const [aiSummary, setAiSummary] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // --- 1. FETCH COURSE DATA ---
   useEffect(() => {
@@ -55,16 +67,30 @@ const CourseViewer = () => {
     loadCourse();
   }, [courseId]);
 
-  // --- 2. SYNC NOTE WHEN VIDEO CHANGES ---
-  // Whenever the user switches videos, load the note for THAT video
+  // --- 2. SYNC DATA WHEN VIDEO CHANGES ---
   useEffect(() => {
     if (course && activeVideoId) {
       const video = course.videos.find((v) => v.videoId === activeVideoId);
-      // Load existing note from DB/State or default to empty string
+
+      // Load Note
       setCurrentNote(video?.note || "");
       setNoteStatus("saved");
+
+      // Load AI Summary (if it exists in local state)
+      setAiSummary(video?.aiSummary || "");
     }
   }, [activeVideoId, course]);
+
+  const handleCopySummary = async () => {
+    if (!aiSummary) return;
+    try {
+      await navigator.clipboard.writeText(aiSummary);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
 
   // --- LOADING STATE ---
   if (loading) {
@@ -137,13 +163,11 @@ const CourseViewer = () => {
 
   const handleSaveNote = async () => {
     setIsSavingNote(true);
-    // Call the context function (which calls the API)
     const success = await saveNote(course._id, activeVideoId, currentNote);
     setIsSavingNote(false);
 
     if (success) {
       setNoteStatus("saved");
-      // Update local course state so if we switch videos and come back, the note is there
       setCourse((prev) => ({
         ...prev,
         videos: prev.videos.map((v) =>
@@ -155,8 +179,25 @@ const CourseViewer = () => {
     }
   };
 
+  // --- AI HANDLER ---
+  const handleGenerateAiSummary = async () => {
+    setIsGeneratingAi(true);
+    const summary = await generateSummary(course._id, activeVideoId);
+    setIsGeneratingAi(false);
+
+    if (summary) {
+      setAiSummary(summary);
+      setCourse((prev) => ({
+        ...prev,
+        videos: prev.videos.map((v) =>
+          v.videoId === activeVideoId ? { ...v, aiSummary: summary } : v
+        ),
+      }));
+    }
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 font-inter">
+    <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 font-inter text-zinc-900 dark:text-zinc-50">
       {/* --- MOBILE BACKDROP --- */}
       {isSidebarOpen && (
         <div
@@ -194,7 +235,7 @@ const CourseViewer = () => {
             <ArrowLeft size={14} />
             Back to Dashboard
           </Link>
-          <h1 className="font-spacegrotesk font-bold text-lg text-zinc-900 dark:text-zinc-50 leading-tight mb-3 line-clamp-2">
+          <h1 className="font-spacegrotesk font-bold text-lg leading-tight mb-3 line-clamp-2">
             {course.title}
           </h1>
           <div className="space-y-1.5">
@@ -226,16 +267,15 @@ const CourseViewer = () => {
                 key={video.videoId}
                 onClick={() => {
                   setActiveVideoId(video.videoId);
-                  // Optional: Close sidebar on mobile when selected
                   if (window.innerWidth < 768) setIsSidebarOpen(false);
                 }}
                 className={`
-                    w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group
-                    ${
-                      isActive
-                        ? "bg-sky-50 dark:bg-sky-900/20"
-                        : "hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
-                    }
+                  w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group
+                  ${
+                    isActive
+                      ? "bg-sky-50 dark:bg-sky-900/20"
+                      : "hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                  }
                 `}
               >
                 <div className="shrink-0 mt-0.5">
@@ -298,7 +338,7 @@ const CourseViewer = () => {
       <main className="flex-1 flex flex-col h-full overflow-y-auto relative w-full">
         <header className="h-16 shrink-0 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl px-4 md:px-8 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4 text-sm w-full">
-            {/* Desktop Expand Button (Hidden on Mobile) */}
+            {/* Desktop Expand Button */}
             {!isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -399,23 +439,31 @@ const CourseViewer = () => {
 
           {/* TABS */}
           <div className="border-b border-zinc-200 dark:border-zinc-800 mb-6">
-            <div className="flex gap-6 overflow-x-auto scrollbar-none">
-              {["Description", "Notes", "Resources"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab.toLowerCase())}
-                  className={`
-                        pb-3 text-sm font-medium border-b-2 transition-colors relative top-[1px] whitespace-nowrap
+            <div className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-none">
+              {["Description", "Notes", "AI Summary"].map((tab) => {
+                const tabKey = tab.toLowerCase().replace(" ", "_"); // "ai_summary"
+                const isActive = activeTab === tabKey;
+
+                return (
+                  <button
+                    key={tabKey}
+                    onClick={() => setActiveTab(tabKey)}
+                    className={`
+                        pb-3 text-sm font-medium border-b-2 transition-colors relative top-[1px] whitespace-nowrap flex items-center gap-2
                         ${
-                          activeTab === tab.toLowerCase()
+                          isActive
                             ? "border-sky-500 text-sky-600 dark:text-sky-400"
                             : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                         }
                     `}
-                >
-                  {tab}
-                </button>
-              ))}
+                  >
+                    {tab === "Description" && <FileText size={16} />}
+                    {tab === "Notes" && <StickyNote size={16} />}
+                    {tab === "AI Summary" && <Sparkles size={16} />}
+                    {tab}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -435,20 +483,18 @@ const CourseViewer = () => {
                     className: "text-sky-600 dark:text-sky-400 hover:underline",
                   }}
                 >
-                  {activeVideo.description}
+                  <div className="whitespace-pre-wrap break-words font-sans text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                    {activeVideo.description || (
+                      <span className="italic text-zinc-500">
+                        No description available.
+                      </span>
+                    )}
+                  </div>
                 </Linkify>
-                <div className="whitespace-pre-wrap break-words font-sans text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  {activeVideo.description ? (
-                    activeVideo.description
-                  ) : (
-                    <span className="italic text-zinc-500">
-                      No description available.
-                    </span>
-                  )}
-                </div>
               </div>
             )}
-            {/* TAB: NOTES (NEW) */}
+
+            {/* TAB: NOTES */}
             {activeTab === "notes" && (
               <div className="animate-in fade-in duration-300 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
@@ -503,10 +549,131 @@ const CourseViewer = () => {
               </div>
             )}
 
-            {/* TAB: RESOURCES (PLACEHOLDER) */}
-            {activeTab === "resources" && (
-              <div className="p-10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center text-center text-zinc-500 animate-in fade-in duration-300">
-                <span>No resources available for this video.</span>
+            {/* TAB: AI SUMMARY */}
+            {activeTab === "ai_summary" && (
+              <div className="animate-in fade-in duration-300">
+                {!aiSummary ? (
+                  // EMPTY STATE
+                  <div className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 text-center">
+                    <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                      <Sparkles
+                        size={20}
+                        className="text-zinc-500 dark:text-zinc-400"
+                      />
+                    </div>
+                    <h3 className="text-zinc-900 dark:text-zinc-100 font-medium mb-1">
+                      Generate AI Summary
+                    </h3>
+                    <p className="text-zinc-500 text-sm max-w-xs mb-6 leading-relaxed">
+                      Get a concise summary of this video's key takeaways using
+                      Gemini AI.
+                    </p>
+                    <button
+                      onClick={handleGenerateAiSummary}
+                      disabled={isGeneratingAi}
+                      className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-medium transition-all shadow-sm shadow-sky-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isGeneratingAi ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={16} />
+                          Generate Summary
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  // FILLED STATE
+                  <div className="relative group">
+                    <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-zinc-700 dark:text-zinc-300 selection:bg-sky-500 selection:text-white">
+                      <ReactMarkdown
+                        components={{
+                          // 1. Fix Headings: Add explicit top/bottom margins & bold font
+                          h1: ({ node, ...props }) => (
+                            <h1
+                              className="text-2xl font-bold mt-8 mb-4 text-zinc-900 dark:text-zinc-100"
+                              {...props}
+                            />
+                          ),
+                          h2: ({ node, ...props }) => (
+                            <h2
+                              className="text-xl font-bold mt-6 mb-3 text-zinc-900 dark:text-zinc-100"
+                              {...props}
+                            />
+                          ),
+                          h3: ({ node, ...props }) => (
+                            <h3
+                              className="text-lg font-bold mt-4 mb-2 text-zinc-900 dark:text-zinc-100"
+                              {...props}
+                            />
+                          ),
+
+                          // 2. Fix Paragraphs: Add bottom margin to create gaps between text blocks
+                          p: ({ node, ...props }) => (
+                            <p className="mb-4 leading-relaxed" {...props} />
+                          ),
+
+                          // 3. Fix Bold: Switch to 'font-bold' (700) instead of 'semibold' (600)
+                          strong: ({ node, ...props }) => (
+                            <strong
+                              className="font-bold text-black dark:text-white"
+                              {...props}
+                            />
+                          ),
+
+                          // Lists: Keep your existing styling but add 'mb-4' for spacing
+                          ul: ({ node, ...props }) => (
+                            <ul
+                              className="list-disc pl-5 mb-4 space-y-2"
+                              {...props}
+                            />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li
+                              className="pl-1 marker:text-sky-500"
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {aiSummary}
+                      </ReactMarkdown>
+                    </div>
+
+                    {/* Button Footer Section */}
+                    <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                      {/* NEW: Copy Button (Bottom Left) */}
+                      <button
+                        onClick={handleCopySummary}
+                        className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 flex items-center gap-1.5 transition-colors"
+                      >
+                        {isCopied ? (
+                          <Check size={14} className="text-green-500" />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                        {isCopied ? "Copied to clipboard!" : "Copy Summary"}
+                      </button>
+
+                      {/* EXISTING: Regenerate Button (Bottom Right) */}
+                      <button
+                        onClick={handleGenerateAiSummary}
+                        disabled={isGeneratingAi}
+                        className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 flex items-center gap-1.5 transition-colors"
+                      >
+                        <RefreshCw
+                          size={12}
+                          className={isGeneratingAi ? "animate-spin" : ""}
+                        />
+                        {isGeneratingAi ? "Regenerating..." : "Regenerate"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

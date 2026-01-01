@@ -5,6 +5,8 @@ import {
   fetchPlaylist,
   fetchPlaylistForResync,
 } from "../services/youtube.service.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { YoutubeTranscript } from "youtube-transcript";
 
 export const importCourse = asyncHandler(async (req, res) => {
   const { playlistUrl, title } = req.body;
@@ -251,4 +253,93 @@ export const saveVideoNote = asyncHandler(async (req, res) => {
     success: true,
     message: "Note saved successfully",
   });
+});
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+export const getVideoSummary = asyncHandler(async (req, res) => {
+  const { id } = req.params; // Course ID
+  const { videoId } = req.body;
+
+  if (!videoId) throw new ApiError(400, "Video ID is required");
+
+  // --- FIX STARTS HERE ---
+  // 1. Check if summary already exists in DB
+  // We MUST query "videos.videoId" so the projection "videos.$" knows which index to return
+  const course = await Course.findOne(
+    {
+      _id: id,
+      userId: req.user.id,
+      "videos.videoId": videoId, // <--- ADD THIS LINE
+    },
+    { "videos.$": 1 }
+  );
+  // --- FIX ENDS HERE ---
+
+  if (!course || !course.videos || !course.videos[0]) {
+    // If course exists but video not found in it, or course doesn't exist
+    throw new ApiError(404, "Course or video not found");
+  }
+
+  const video = course.videos[0];
+
+  // If we already have a summary, return it immediately
+  if (video.aiSummary) {
+    return res.status(200).json({ success: true, summary: video.aiSummary });
+  }
+
+  // 2. Prepare content for AI
+  let transcriptText = "";
+  try {
+    // Attempt to fetch transcript
+    const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
+    // Combine text and clean it up slightly
+    transcriptText = transcriptItems.map((item) => item.text).join(" ");
+  } catch (error) {
+    console.log(
+      `No transcript found for ${videoId}, falling back to description.`
+    );
+  }
+
+  // 3. Generate Summary with Gemini
+  try {
+    // Ensure API Key exists
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not set in environment variables");
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    let prompt = "";
+    if (transcriptText) {
+      // Limit transcript length to approx 15k characters to be safe with tokens
+      const safeTranscript = transcriptText.substring(0, 15000);
+      prompt = `You are an expert tutor. Summarize the following YouTube video transcript into 5-7 concise, actionable bullet points. Focus purely on the educational value and key concepts. Do not mention "the speaker" or "the video", just state the facts.\n\n Video Title: ${video.title} \n\n Transcript: ${safeTranscript}`;
+    } else {
+      prompt = `You are an expert tutor. Summarize this video based on its title and description. Provide 3-5 key takeaways.\n\n Title: ${video.title} \n\n Description: ${video.description}`;
+    }
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const summaryText = response.text();
+
+    // 4. Save to Database
+    await Course.updateOne(
+      {
+        _id: id,
+        userId: req.user.id,
+        "videos.videoId": videoId,
+      },
+      {
+        $set: { "videos.$.aiSummary": summaryText },
+      }
+    );
+
+    res.status(200).json({ success: true, summary: summaryText });
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    // Return a 500 but with a specific message so we know what broke
+    throw new ApiError(500, `Failed to generate AI summary: ${error.message}`);
+  }
 });
