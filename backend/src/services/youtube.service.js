@@ -103,6 +103,8 @@ export const fetchPlaylist = async (playlistUrl) => {
           videos.push({
             videoId: videoId,
             title: snippet.title,
+            description:
+              detail?.snippet?.description || snippet.description || "",
             // Use high res thumbnail if available
             thumbnail:
               snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url,

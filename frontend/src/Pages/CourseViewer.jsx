@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCourses } from "../context/CourseContext";
 import { AnimatedThemeToggle } from "../components/animated-theme-toggle";
+import Linkify from "linkify-react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -422,15 +423,31 @@ const CourseViewer = () => {
             {/* TAB: DESCRIPTION */}
             {activeTab === "description" && (
               <div className="animate-in fade-in duration-300">
-                <p>
-                  In this lesson: <strong>{activeVideo.title}</strong>. <br />
-                  <br />
-                  Focus mode enabled. Watch the video above and mark it as
-                  complete to track your progress.
-                </p>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                    About this lesson
+                  </h3>
+                </div>
+
+                <Linkify
+                  options={{
+                    target: "_blank",
+                    className: "text-sky-600 dark:text-sky-400 hover:underline",
+                  }}
+                >
+                  {activeVideo.description}
+                </Linkify>
+                <div className="whitespace-pre-wrap break-words font-sans text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  {activeVideo.description ? (
+                    activeVideo.description
+                  ) : (
+                    <span className="italic text-zinc-500">
+                      No description available.
+                    </span>
+                  )}
+                </div>
               </div>
             )}
-
             {/* TAB: NOTES (NEW) */}
             {activeTab === "notes" && (
               <div className="animate-in fade-in duration-300 flex flex-col gap-3">

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const videoSchema = new mongoose.Schema(
   {
     videoId: { type: String, required: true },
+    description: { type: String, default: "" },
     title: { type: String, required: true },
     duration: { type: String, default: "00:00" },
     position: { type: Number, required: true },
