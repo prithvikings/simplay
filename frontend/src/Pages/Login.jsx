@@ -22,11 +22,21 @@ const Login = () => {
     setError("");
     try {
       const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+
+      // 1. Send Request
       const { data } = await axios.post(BACKEND_URL, {
         idToken: credential,
       });
 
       if (data.success) {
+        // --- STREAK LOGIC START ---
+        // This captures the flag sent from your Backend Controller
+        if (data.streakUpdated) {
+          sessionStorage.setItem("showStreakModal", "true");
+        }
+        // --- STREAK LOGIC END ---
+
+        // 2. Update Context & Navigate
         login(data.user, data.token);
         navigate("/dashboard");
       }

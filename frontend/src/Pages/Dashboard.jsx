@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import ImportModal from "../components/ImportModal";
 import { useAuth } from "../context/AuthContext";
 import { useCourses } from "../context/CourseContext";
+import StreakModal from "../components/StreakModal";
 import {
   Play,
   Clock,
@@ -151,12 +152,32 @@ const Dashboard = () => {
     }
   };
 
+  // NEW STATE for Streak Modal
+  const [showStreakModal, setShowStreakModal] = useState(false);
+
+  useEffect(() => {
+    // Check if we need to show the modal
+    const shouldShow = sessionStorage.getItem("showStreakModal");
+
+    if (shouldShow === "true") {
+      setShowStreakModal(true);
+      // Remove it so it doesn't show on page refresh
+      sessionStorage.removeItem("showStreakModal");
+    }
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 font-inter selection:bg-sky-500/20">
       <Sidebar
         onOpenImportModal={() => setIsImportModalOpen(true)}
         mobileOpen={mobileMenuOpen}
         setMobileOpen={setMobileMenuOpen}
+      />
+
+      <StreakModal
+        isOpen={showStreakModal}
+        onClose={() => setShowStreakModal(false)}
+        streak={user?.streak || 1}
       />
 
       {/* Import Modal */}
@@ -216,9 +237,18 @@ const Dashboard = () => {
 
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full shadow-sm">
-                <Flame size={16} className="text-orange-500 fill-orange-500" />
+                <Flame
+                  size={16}
+                  // Conditional styling: Orange if streak > 0, Grey if 0
+                  className={`${
+                    user?.streak > 0
+                      ? "text-orange-500 fill-orange-500"
+                      : "text-zinc-400"
+                  }`}
+                />
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  12 Day Streak
+                  {/* DYNAMIC DATA HERE */}
+                  {user?.streak || 0} Day Streak
                 </span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full shadow-sm">

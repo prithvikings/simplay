@@ -1,6 +1,6 @@
 // backend/src/models/User.js
 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,10 +23,16 @@ const userSchema = new mongoose.Schema(
     },
 
     avatar: String,
+    // --- NEW FIELDS ---
+    streak: {
+      current: { type: Number, default: 0 },
+      lastActiveDate: { type: Date, default: null },
+    },
   },
+
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);

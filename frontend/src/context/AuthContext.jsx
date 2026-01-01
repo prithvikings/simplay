@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     // Optional: Redirect to login is handled by ProtectedRoute,
     // but you can force a window location reload if needed to clear states
+    sessionStorage.removeItem("showStreakModal");
   };
 
   return (
