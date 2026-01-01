@@ -7,6 +7,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   X, // Added X for closing mobile menu
+  MessageSquareCode,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +23,7 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Library, label: "My Courses", path: "/courses" },
+    { icon: MessageSquareCode, label: "Developer Msg", path: "/developer" }, // <--- Add this line
   ];
 
   // --- Helper to render Menu Items (Used for both Mobile and Desktop) ---

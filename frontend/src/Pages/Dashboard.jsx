@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDailyTimeTracker } from "../hooks/useDailyTimeTracker";
 
 // --- DELETE CONFIRMATION MODAL COMPONENT ---
 const DeleteConfirmationModal = ({
@@ -118,6 +119,8 @@ const Dashboard = () => {
   const { courses, isLoading, deleteCourse } = useCourses();
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  const { formatTime } = useDailyTimeTracker();
 
   // Modals & Menus States
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -253,8 +256,9 @@ const Dashboard = () => {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full shadow-sm">
                 <Clock size={16} className="text-sky-500" />
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  48m Today
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 min-w-[60px]">
+                  {/* Call the format function here */}
+                  {formatTime()} Today
                 </span>
               </div>
             </div>

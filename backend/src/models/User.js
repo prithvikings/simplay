@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema(
       current: { type: Number, default: 0 },
       lastActiveDate: { type: Date, default: null },
     },
+    usageHistory: [
+      {
+        date: { type: String, required: true }, // Format: "YYYY-MM-DD"
+        seconds: { type: Number, default: 0 },
+      },
+    ],
   },
 
   {
