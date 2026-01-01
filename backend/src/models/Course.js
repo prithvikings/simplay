@@ -5,12 +5,12 @@ const videoSchema = new mongoose.Schema(
   {
     videoId: { type: String, required: true },
     title: { type: String, required: true },
-    // ADDED: Needed for the video player list
     duration: { type: String, default: "00:00" },
     position: { type: Number, required: true },
     isAvailable: { type: Boolean, default: true },
     isCompleted: { type: Boolean, default: false },
     completedAt: { type: Date, default: null },
+    note: { type: String, default: "" },
   },
   { _id: false }
 );

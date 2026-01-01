@@ -134,6 +134,39 @@ export const CourseProvider = ({ children }) => {
     }
   };
 
+  // 5. Save Video Note (NEW)
+  const saveNote = async (courseId, videoId, noteContent) => {
+    try {
+      // 1. Optimistic Update (Update local state immediately)
+      setCourses((prevCourses) =>
+        prevCourses.map((course) => {
+          if (course._id === courseId || course.id === courseId) {
+            if (!course.videos) return course;
+
+            return {
+              ...course,
+              videos: course.videos.map((v) =>
+                v.videoId === videoId ? { ...v, note: noteContent } : v
+              ),
+            };
+          }
+          return course;
+        })
+      );
+
+      // 2. API Call
+      await api.put(`/courses/${courseId}/note`, {
+        videoId,
+        note: noteContent,
+      });
+
+      return true; // Return success
+    } catch (error) {
+      console.error("Failed to save note", error);
+      return false; // Return failure
+    }
+  };
+
   return (
     <CourseContext.Provider
       value={{
@@ -142,6 +175,7 @@ export const CourseProvider = ({ children }) => {
         getCourse,
         markVideoComplete,
         deleteCourse,
+        saveNote,
         isLoading,
       }}
     >

@@ -216,3 +216,39 @@ export const validatePlaylist = asyncHandler(async (req, res) => {
     videoCount: playlistData.videos.length,
   });
 });
+
+// ... existing imports
+
+export const saveVideoNote = asyncHandler(async (req, res) => {
+  const { videoId, note } = req.body;
+  const { id } = req.params; // Course ID
+
+  // Validate input
+  if (!videoId) {
+    throw new ApiError(400, "Video ID is required");
+  }
+
+  // Find course and update the specific video's note
+  const updatedCourse = await Course.findOneAndUpdate(
+    {
+      _id: id,
+      userId: req.user.id,
+      "videos.videoId": videoId,
+    },
+    {
+      $set: {
+        "videos.$.note": note, // Update the note field of the matched video
+      },
+    },
+    { new: true } // Return updated document
+  );
+
+  if (!updatedCourse) {
+    throw new ApiError(404, "Course or Video not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Note saved successfully",
+  });
+});

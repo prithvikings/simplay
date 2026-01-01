@@ -10,6 +10,7 @@ import {
   deleteCourse,
   resyncCourse,
   validatePlaylist,
+  saveVideoNote,
 } from "../controllers/course.controller.js";
 
 import { protect } from "../middlewares/auth.middleware.js";
@@ -20,6 +21,7 @@ import {
   importCourseSchema,
   updateProgressSchema,
   courseIdParamSchema,
+  saveNoteSchema,
 } from "../validators/course.validator.js";
 
 const router = Router();
@@ -57,6 +59,14 @@ router.post(
   apiLimiter,
   validate(courseIdParamSchema),
   resyncCourse
+);
+
+// Save video note (validate ID + body)
+router.put(
+  "/:id/note",
+  validate(courseIdParamSchema),
+  validate(saveNoteSchema),
+  saveVideoNote
 );
 
 // Delete course (validate ID)

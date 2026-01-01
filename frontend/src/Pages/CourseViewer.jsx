@@ -12,12 +12,13 @@ import {
   SidebarClose,
   SidebarOpen,
   Loader2,
+  Save,
 } from "lucide-react";
 
 const CourseViewer = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { getCourse, markVideoComplete } = useCourses();
+  const { getCourse, markVideoComplete, saveNote } = useCourses();
 
   // --- STATE ---
   const [course, setCourse] = useState(null);
@@ -25,6 +26,11 @@ const CourseViewer = () => {
   const [activeVideoId, setActiveVideoId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("description");
+
+  // --- NOTES STATE ---
+  const [currentNote, setCurrentNote] = useState("");
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [noteStatus, setNoteStatus] = useState(""); // "saved", "unsaved", "error"
 
   // --- 1. FETCH COURSE DATA ---
   useEffect(() => {
@@ -34,7 +40,7 @@ const CourseViewer = () => {
 
       if (data) {
         setCourse(data);
-        // Initialize active video
+        // Initialize active video to first uncompleted, or just the first one
         if (data.videos && data.videos.length > 0) {
           const firstUncompleted = data.videos.find((v) => !v.isCompleted);
           setActiveVideoId(
@@ -47,6 +53,17 @@ const CourseViewer = () => {
 
     loadCourse();
   }, [courseId]);
+
+  // --- 2. SYNC NOTE WHEN VIDEO CHANGES ---
+  // Whenever the user switches videos, load the note for THAT video
+  useEffect(() => {
+    if (course && activeVideoId) {
+      const video = course.videos.find((v) => v.videoId === activeVideoId);
+      // Load existing note from DB/State or default to empty string
+      setCurrentNote(video?.note || "");
+      setNoteStatus("saved");
+    }
+  }, [activeVideoId, course]);
 
   // --- LOADING STATE ---
   if (loading) {
@@ -109,6 +126,32 @@ const CourseViewer = () => {
         ((prev.completedCount + 1) / prev.totalVideos) * 100
       ),
     }));
+  };
+
+  // --- NOTE HANDLERS ---
+  const handleNoteChange = (e) => {
+    setCurrentNote(e.target.value);
+    setNoteStatus("unsaved");
+  };
+
+  const handleSaveNote = async () => {
+    setIsSavingNote(true);
+    // Call the context function (which calls the API)
+    const success = await saveNote(course._id, activeVideoId, currentNote);
+    setIsSavingNote(false);
+
+    if (success) {
+      setNoteStatus("saved");
+      // Update local course state so if we switch videos and come back, the note is there
+      setCourse((prev) => ({
+        ...prev,
+        videos: prev.videos.map((v) =>
+          v.videoId === activeVideoId ? { ...v, note: currentNote } : v
+        ),
+      }));
+    } else {
+      setNoteStatus("error");
+    }
   };
 
   return (
@@ -182,8 +225,8 @@ const CourseViewer = () => {
                 key={video.videoId}
                 onClick={() => {
                   setActiveVideoId(video.videoId);
-                  // Optional: Close sidebar on mobile when a video is selected
-                  // if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  // Optional: Close sidebar on mobile when selected
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
                 }}
                 className={`
                     w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group
@@ -353,6 +396,7 @@ const CourseViewer = () => {
             </div>
           </div>
 
+          {/* TABS */}
           <div className="border-b border-zinc-200 dark:border-zinc-800 mb-6">
             <div className="flex gap-6 overflow-x-auto scrollbar-none">
               {["Description", "Notes", "Resources"].map((tab) => (
@@ -375,6 +419,7 @@ const CourseViewer = () => {
           </div>
 
           <div className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed pb-10">
+            {/* TAB: DESCRIPTION */}
             {activeTab === "description" && (
               <div className="animate-in fade-in duration-300">
                 <p>
@@ -385,9 +430,66 @@ const CourseViewer = () => {
                 </p>
               </div>
             )}
+
+            {/* TAB: NOTES (NEW) */}
             {activeTab === "notes" && (
+              <div className="animate-in fade-in duration-300 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Your Personal Notes
+                  </h3>
+                  <span
+                    className={`text-xs ${
+                      noteStatus === "unsaved"
+                        ? "text-amber-500"
+                        : noteStatus === "saved"
+                        ? "text-green-500"
+                        : "text-zinc-400"
+                    }`}
+                  >
+                    {noteStatus === "unsaved"
+                      ? "Unsaved changes"
+                      : noteStatus === "saved"
+                      ? "Saved"
+                      : ""}
+                  </span>
+                </div>
+
+                <textarea
+                  value={currentNote}
+                  onChange={handleNoteChange}
+                  placeholder="Type your notes here... (e.g. key takeaways, timestamps, formulas)"
+                  className="w-full h-64 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 resize-none text-zinc-700 dark:text-zinc-300 transition-colors"
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleSaveNote}
+                    disabled={isSavingNote || noteStatus === "saved"}
+                    className={`
+                      flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all
+                      ${
+                        noteStatus === "saved"
+                          ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
+                          : "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:opacity-90 active:scale-95"
+                      }
+                    `}
+                  >
+                    {isSavingNote ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    {isSavingNote ? "Saving..." : "Save Note"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: RESOURCES (PLACEHOLDER) */}
+            {activeTab === "resources" && (
               <div className="p-10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center text-center text-zinc-500 animate-in fade-in duration-300">
-                <span>Notes feature coming soon.</span>
+                <span>No resources available for this video.</span>
               </div>
             )}
           </div>
