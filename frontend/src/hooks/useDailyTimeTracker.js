@@ -59,7 +59,7 @@ export const useDailyTimeTracker = () => {
         // We use pure fetch with keepalive: true because axios can be cancelled on tab close
         const token = localStorage.getItem("token");
         const backendUrl =
-          import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+          import.meta.env.VITE_BACKEND_URL || "http://localhost:8000/api";
 
         fetch(`${backendUrl}/user/track-time`, {
           method: "POST",

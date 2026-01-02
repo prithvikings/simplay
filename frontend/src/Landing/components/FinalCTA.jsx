@@ -1,7 +1,13 @@
 import React from "react";
 import { Button } from "../../components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const FinalCTA = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="bg-zinc-100 dark:bg-zinc-950 border border-dashed border-b-0 relative overflow-hidden">
       {/* Adjusted padding for mobile vs desktop */}
@@ -36,6 +42,7 @@ const FinalCTA = () => {
 
         {/* Desktop view button */}
         <Button
+          onClick={handleClick}
           variant="default"
           className="
           hidden md:block
@@ -67,6 +74,7 @@ const FinalCTA = () => {
 
         {/* Mobile view button */}
         <Button
+          onClick={handleClick}
           variant="default"
           className="
           block md:hidden
