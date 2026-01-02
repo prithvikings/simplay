@@ -3,8 +3,8 @@ import { useAuth } from "./context/AuthContext";
 import LandingPage from "./Landing/LandingPage";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
-import CourseViewer from "./pages/CourseViewer";
-import Courses from "./pages/Courses";
+import CourseViewer from "./Pages/CourseViewer";
+import Courses from "./Pages/Courses";
 import DeveloperMsg from "./Pages/DeveloperMsg";
 import Profile from "./Pages/Profile";
 
