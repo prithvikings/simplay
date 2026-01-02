@@ -5,7 +5,6 @@ import {
   Menu,
   Github,
   ArrowUpRight,
-  Coffee,
   Send,
   Loader2,
   Check,
@@ -13,12 +12,70 @@ import {
   Sparkles,
   Focus,
   Zap,
+  Linkedin,
+  Hammer, // For construction
+  ShieldAlert, // For privacy
+  Lock, // Added Lock
+  Cone, // Added Cone
+  X,
 } from "lucide-react";
+
+// --- REUSABLE INFO MODAL ---
+const InfoModal = ({
+  isOpen,
+  onClose,
+  title,
+  message,
+  icon: Icon,
+  colorClass,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-zinc-900/20 dark:bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in"
+        onClick={onClose}
+      />
+
+      {/* Modal Card */}
+      <div className="relative w-full max-w-sm bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Content */}
+        <div className="p-6 flex flex-col items-center text-center">
+          <div
+            className={`w-14 h-14 ${colorClass} bg-opacity-10 border border-current border-opacity-10 rounded-md flex items-center justify-center mb-5 shadow-sm`}
+          >
+            <Icon size={28} className={colorClass.replace("bg-", "text-")} />
+          </div>
+
+          <h3 className="text-xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            {title}
+          </h3>
+
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8 leading-relaxed">
+            {message}
+          </p>
+
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DeveloperMsg = () => {
   // Sidebar & Modal States
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Info Modal State
+  const [activeModal, setActiveModal] = useState(null); // 'portfolio' | 'code' | null
 
   // Feedback Form States
   const [feedback, setFeedback] = useState("");
@@ -62,12 +119,35 @@ const DeveloperMsg = () => {
     <div className="flex min-h-screen bg-white dark:bg-[#0C0C0C] font-inter text-zinc-900 dark:text-zinc-100 relative selection:bg-zinc-200 dark:selection:bg-zinc-800">
       {/* --- Sidebar --- */}
       <Sidebar
-        onOpenImportModal={() => setIsModalOpen(true)}
+        onOpenImportModal={() => setIsImportModalOpen(true)}
         mobileOpen={mobileMenuOpen}
         setMobileOpen={setMobileMenuOpen}
       />
 
-      <ImportModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+      />
+
+      {/* --- PORTFOLIO MODAL --- */}
+      <InfoModal
+        isOpen={activeModal === "portfolio"}
+        onClose={() => setActiveModal(null)}
+        icon={Cone}
+        colorClass="bg-amber-500 text-amber-500"
+        title="Under Construction"
+        message="This corner of the internet is currently being crafted. I'm polishing the pixels and refining the copy. Check back soon for the launch."
+      />
+
+      {/* --- CODE MODAL --- */}
+      <InfoModal
+        isOpen={activeModal === "code"}
+        onClose={() => setActiveModal(null)}
+        icon={Lock}
+        colorClass="bg-zinc-500 text-zinc-500"
+        title="Source Restricted"
+        message="Due to security and privacy protocols, the source code is currently private. We plan to open-source specific modules in the future once they are fully audited."
+      />
 
       <main className="flex-1 overflow-y-auto relative h-screen">
         {/* --- Mobile Header --- */}
@@ -81,7 +161,7 @@ const DeveloperMsg = () => {
           </button>
         </div>
 
-        {/* --- Main Content Container (Notion/Linear Style Document) --- */}
+        {/* --- Main Content Container --- */}
         <div className="max-w-2xl mx-auto px-6 py-12 md:py-20">
           {/* Badge */}
           <div className="flex items-center gap-2 mb-8">
@@ -166,29 +246,31 @@ const DeveloperMsg = () => {
 
             {/* Links / Footer Actions */}
             <div className="flex flex-wrap items-center gap-4 my-12">
-              <a
-                href="#"
+              <button
+                onClick={() => setActiveModal("portfolio")}
                 className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 text-sm font-medium rounded hover:opacity-90 transition-opacity"
               >
                 <span>My Portfolio</span>
                 <ArrowUpRight size={14} />
-              </a>
+              </button>
 
               <a
-                href="#"
+                href="https://www.linkedin.com/in/prithvi312/"
                 className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400 text-sm font-medium rounded transition-colors"
+                target="_blank"
+                rel="noreferrer"
               >
-                <Coffee size={14} />
+                <Linkedin size={14} />
                 <span>Support the build</span>
               </a>
 
-              <a
-                href="#"
+              <button
+                onClick={() => setActiveModal("code")}
                 className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400 text-sm font-medium rounded transition-colors"
               >
                 <Github size={14} />
                 <span>View Code</span>
-              </a>
+              </button>
             </div>
 
             {/* Separator */}

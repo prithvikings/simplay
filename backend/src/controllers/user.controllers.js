@@ -44,3 +44,29 @@ export const getTodayUsage = asyncHandler(async (req, res) => {
 
   res.status(200).json({ seconds });
 });
+
+// GET /api/user/profile
+export const getProfile = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // Fetch user with usageHistory (needed for Heatmap)
+  const user = await User.findById(userId).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Calculate total seconds studied globally
+  const totalSeconds = user.usageHistory.reduce(
+    (acc, curr) => acc + curr.seconds,
+    0
+  );
+
+  res.status(200).json({
+    success: true,
+    user: {
+      ...user.toObject(),
+      totalSeconds, // Send pre-calculated total
+    },
+  });
+});

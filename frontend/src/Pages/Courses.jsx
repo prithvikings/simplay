@@ -173,7 +173,7 @@ const Courses = () => {
 
         <div className="max-w-6xl mx-auto px-6 py-8 md:px-12 md:py-12">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-zinc-200 dark:border-zinc-800 pb-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-zinc-200 border-dashed dark:border-zinc-800 pb-8">
             <div>
               <h1 className="text-3xl font-spacegrotesk font-bold text-zinc-900 dark:text-zinc-50 mb-2">
                 My Courses
@@ -200,7 +200,7 @@ const Courses = () => {
 
           {/* Grid */}
           {filteredCourses.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
               {/* Add New Trigger */}
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -229,7 +229,7 @@ const Courses = () => {
                   {/* Clickable Image Area */}
                   <div
                     onClick={() => navigate(`/course/${course._id}`)}
-                    className="cursor-pointer aspect-video relative overflow-hidden bg-zinc-100 dark:bg-zinc-800 rounded-t-3xl"
+                    className="cursor-pointer aspect-video relative overflow-hidden bg-zinc-100 dark:bg-zinc-800 rounded-t-xl"
                   >
                     <img
                       src={course.thumbnail}

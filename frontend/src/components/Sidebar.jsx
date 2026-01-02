@@ -6,14 +6,13 @@ import {
   PlusCircle,
   PanelLeftClose,
   PanelLeftOpen,
-  X, // Added X for closing mobile menu
+  X,
   MessageSquareCode,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { AnimatedThemeToggle } from "./animated-theme-toggle";
 
-// Added mobileOpen and setMobileOpen props
 const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,10 +22,10 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Library, label: "My Courses", path: "/courses" },
-    { icon: MessageSquareCode, label: "Developer Msg", path: "/developer" }, // <--- Add this line
+    { icon: MessageSquareCode, label: "Developer Msg", path: "/developer" },
   ];
 
-  // --- Helper to render Menu Items (Used for both Mobile and Desktop) ---
+  // --- Helper to render Menu Items ---
   const renderMenuItems = (isMobile = false) => (
     <>
       {menuItems.map((item) => {
@@ -36,7 +35,7 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
             key={item.path}
             onClick={() => {
               navigate(item.path);
-              if (isMobile && setMobileOpen) setMobileOpen(false); // Close on mobile click
+              if (isMobile && setMobileOpen) setMobileOpen(false);
             }}
             className={`
               w-full flex items-center p-2.5 rounded-xl transition-all duration-200 group relative
@@ -96,11 +95,14 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
       >
         {/* --- Logo Area --- */}
         <div
-          className={`p-6 flex items-center h-20 ${
+          onClick={() => {
+            navigate("/dashboard");
+          }}
+          className={`p-6 flex items-center  h-20 ${
             isCollapsed ? "justify-center" : "gap-3"
           }`}
         >
-          <div className="bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 p-1.5 rounded-lg shrink-0 transition-transform hover:scale-105">
+          <div className="bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 p-1.5 rounded-lg shrink-0 transition-transform hover:scale-105 cursor-pointer">
             <svg width="20" height="20" viewBox="0 0 96 96" fill="currentColor">
               <rect x="16" y="16" width="64" height="12" rx="6" />
               <rect x="28" y="32" width="64" height="12" rx="6" />
@@ -111,7 +113,7 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
 
           {/* Title */}
           <div
-            className={`overflow-hidden transition-all duration-300 ${
+            className={`overflow-hidden transition-all duration-300 cursor-pointer ${
               isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
             }`}
           >
@@ -216,6 +218,7 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
 
           {/* User Profile */}
           <div
+            onClick={() => navigate("/profile")}
             className={`
               flex items-center rounded-xl transition-all duration-200
               ${
@@ -246,7 +249,10 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
             </div>
 
             <button
-              onClick={logout}
+              onClick={(e) => {
+                e.stopPropagation();
+                logout();
+              }}
               className={`
                 cursor-pointer text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all
                 ${isCollapsed ? "hidden" : "block"}
@@ -260,7 +266,7 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
       </aside>
 
       {/* ======================================= */}
-      {/* MOBILE OVERLAY DRAWER         */}
+      {/* MOBILE OVERLAY DRAWER        */}
       {/* ======================================= */}
 
       {/* Backdrop */}
@@ -326,14 +332,21 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
           </div>
         </nav>
 
-        {/* Mobile Footer */}
+        {/* Mobile Footer - FIXED HERE */}
         <div className="p-4 border-t border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/50">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-medium text-zinc-500">Theme</span>
             <AnimatedThemeToggle />
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+          <div
+            // ADDED onClick handler here
+            onClick={() => {
+              navigate("/profile");
+              setMobileOpen(false);
+            }}
+            className="flex items-center gap-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
+          >
             <img
               src={
                 user?.avatar ||
@@ -347,7 +360,11 @@ const Sidebar = ({ onOpenImportModal, mobileOpen, setMobileOpen }) => {
                 {user?.name}
               </p>
               <button
-                onClick={logout}
+                // ADDED stopPropagation so clicking logout doesn't trigger navigation
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logout();
+                }}
                 className="text-xs text-red-500 hover:underline"
               >
                 Log out

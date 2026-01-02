@@ -6,6 +6,7 @@ import Dashboard from "./Pages/Dashboard";
 import CourseViewer from "./pages/CourseViewer";
 import Courses from "./pages/Courses";
 import DeveloperMsg from "./Pages/DeveloperMsg";
+import Profile from "./Pages/Profile";
 
 // 1. IMPORT THE TRACKER
 import GlobalTimeTracker from "./components/GlobalTimeTracker";
@@ -92,6 +93,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Courses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
