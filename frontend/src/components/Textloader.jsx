@@ -4,7 +4,7 @@ export function TextLoopBasic() {
   return (
     <div className="flex flex-col items-center justify-center">
       <TextLoop
-        className="font-spacegrotesk font-semibold text-lg dark:text-zinc-700"
+        className="font-spacegrotesk font-semibold text-sm dark:text-zinc-700"
         shuffle={true}
       >
         {/* --- The Classics --- */}

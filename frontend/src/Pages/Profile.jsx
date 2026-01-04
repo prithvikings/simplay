@@ -21,6 +21,7 @@ import {
   Menu,
 } from "lucide-react";
 import api from "../api/axios"; // OPTIMIZATION: Use your custom axios instance
+import { TextLoopBasic } from "../components/Textloader";
 
 // --- REUSABLE COMPONENTS ---
 
@@ -252,7 +253,8 @@ const Profile = () => {
         <div className="max-w-6xl mx-auto px-6 py-8 md:px-12 md:py-12">
           {isLoading ? (
             <div className="h-[60vh] flex items-center justify-center">
-              <Loader2 className="animate-spin text-zinc-400" size={32} />
+              <Loader2 className="animate-spin text-sky-500" size={32} />
+              <TextLoopBasic />
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-10">
