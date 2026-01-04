@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, ArrowLeft, AlertCircle, Sparkles } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { TextLoopBasic } from "../components/Textloader";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -184,10 +185,11 @@ const Login = () => {
 
             {isLoading ? (
               <div className="h-12 w-full rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center gap-2 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed opacity-70">
-                <Loader2 className="animate-spin text-sky-500" size={18} />
+                {/* <Loader2 className="animate-spin text-sky-500" size={18} />
                 <span className="font-medium text-sm text-zinc-500">
                   Authenticating...
-                </span>
+                </span> */}
+                <TextLoopBasic />
               </div>
             ) : (
               <>

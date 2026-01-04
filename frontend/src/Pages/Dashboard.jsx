@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDailyTimeTracker } from "../hooks/useDailyTimeTracker";
+import { TextLoopBasic } from "../components/Textloader";
 
 // --- DELETE CONFIRMATION MODAL COMPONENT ---
 const DeleteConfirmationModal = ({
@@ -267,7 +268,7 @@ const Dashboard = () => {
           {/* Loading State */}
           {isLoading ? (
             <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-sky-500" size={32} />
+              <TextLoopBasic />
             </div>
           ) : (
             <>
