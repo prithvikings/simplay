@@ -267,7 +267,8 @@ const Dashboard = () => {
 
           {/* Loading State */}
           {isLoading ? (
-            <div className="flex justify-center py-20">
+            <div className="flex justify-center items-center gap-4 py-20">
+              <Loader2 className="animate-spin text-sky-500" size={32} />
               <TextLoopBasic />
             </div>
           ) : (
